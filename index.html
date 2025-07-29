@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amazon FBA Pricing Calculator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Amazon FBA Pricing Calculator</h1>
+            <p>Calculate your Amazon FBA fulfillment fees based on product dimensions and weight</p>
+        </header>
+
+        <main>
+            <form id="fbaCalculator" class="calculator-form">
+                <div class="form-section">
+                    <h2>Product Dimensions</h2>
+                    <div class="input-group">
+                        <div class="input-field">
+                            <label for="height">Height (cm)</label>
+                            <input type="number" id="height" name="height" step="0.1" min="0" required>
+                        </div>
+                        <div class="input-field">
+                            <label for="width">Width (cm)</label>
+                            <input type="number" id="width" name="width" step="0.1" min="0" required>
+                        </div>
+                        <div class="input-field">
+                            <label for="depth">Depth (cm)</label>
+                            <input type="number" id="depth" name="depth" step="0.1" min="0" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2>Product Weight</h2>
+                    <div class="input-group">
+                        <div class="input-field">
+                            <label for="weightKg">Weight (kg)</label>
+                            <input type="number" id="weightKg" name="weightKg" step="0.001" min="0" value="0">
+                        </div>
+                        <div class="input-field">
+                            <label for="weightGrams">Weight (grams)</label>
+                            <input type="number" id="weightGrams" name="weightGrams" step="1" min="0" value="0">
+                        </div>
+                    </div>
+                    <p class="weight-note">Enter weight in either kg or grams (or both - they will be combined)</p>
+                </div>
+
+                <div class="form-section">
+                    <h2>Destination Zone</h2>
+                    <div class="input-field">
+                        <label for="zone">Select Zone</label>
+                        <select id="zone" name="zone" required>
+                            <option value="">Select a zone...</option>
+                            <option value="UK">UK (£)</option>
+                            <option value="DE">DE (€)</option>
+                            <option value="FR">FR (€)</option>
+                            <option value="IT">IT (€)</option>
+                            <option value="ES">ES (€)</option>
+                            <option value="NL">NL (€)</option>
+                            <option value="SE">SE (SEK)</option>
+                            <option value="PL">PL (PLN)</option>
+                            <option value="BE">BE (€)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="calculate-btn">Calculate FBA Fee</button>
+            </form>
+
+            <div id="results" class="results-section" style="display: none;">
+                <h2>Calculation Results</h2>
+                <div class="result-item">
+                    <strong>Size Tier:</strong> <span id="sizeTier"></span>
+                </div>
+                <div class="result-item">
+                    <strong>Total Weight:</strong> <span id="totalWeight"></span>
+                </div>
+                <div class="result-item">
+                    <strong>Dimensions:</strong> <span id="dimensions"></span>
+                </div>
+                <div class="result-item">
+                    <strong>FBA Fulfillment Fee:</strong> <span id="fbaFee"></span>
+                </div>
+            </div>
+
+            <div id="testSection" class="test-section">
+                <h2>Test Cases</h2>
+                <button type="button" id="runTests" class="test-btn">Run Size Tier Tests</button>
+                <div id="testResults" class="test-results"></div>
+            </div>
+        </main>
+    </div>
+
+    <script src="fba-calculator.js"></script>
+</body>
+</html> 

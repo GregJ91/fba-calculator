@@ -1,0 +1,227 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    line-height: 1.6;
+    color: #2d3748;
+    background: linear-gradient(135deg, #68d391 0%, #38a169 100%);
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+    color: white;
+}
+
+header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+header p {
+    font-size: 1.1rem;
+    opacity: 0.95;
+}
+
+main {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(56, 161, 105, 0.2);
+    border: 1px solid #e2e8f0;
+}
+
+.calculator-form {
+    margin-bottom: 30px;
+}
+
+.form-section {
+    margin-bottom: 30px;
+}
+
+.form-section h2 {
+    color: #2d5016;
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+    border-bottom: 2px solid #9ae6b4;
+    padding-bottom: 5px;
+    font-weight: 600;
+}
+
+.input-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.input-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.input-field label {
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #2d5016;
+}
+
+.input-field input,
+.input-field select {
+    padding: 12px;
+    border: 2px solid #c6f6d5;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    background: #f7fafc;
+}
+
+.input-field input:focus,
+.input-field select:focus {
+    outline: none;
+    border-color: #38a169;
+    box-shadow: 0 0 0 3px rgba(56, 161, 105, 0.15);
+    background: white;
+}
+
+.weight-note {
+    font-size: 0.9rem;
+    color: #4a7c59;
+    margin-top: 10px;
+    font-style: italic;
+}
+
+.calculate-btn {
+    background: linear-gradient(135deg, #38a169 0%, #2d5016 100%);
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    width: 100%;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.calculate-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(56, 161, 105, 0.4);
+    background: linear-gradient(135deg, #2f855a 0%, #22543d 100%);
+}
+
+.results-section {
+    background: #f0fff4;
+    border-radius: 10px;
+    padding: 25px;
+    margin-top: 30px;
+    border-left: 4px solid #38a169;
+    border: 1px solid #9ae6b4;
+}
+
+.results-section h2 {
+    color: #2d5016;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.result-item {
+    margin-bottom: 12px;
+    font-size: 1.1rem;
+}
+
+.result-item strong {
+    color: #22543d;
+    display: inline-block;
+    min-width: 150px;
+}
+
+.test-section {
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 2px solid #9ae6b4;
+}
+
+.test-btn {
+    background: #48bb78;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    margin-bottom: 20px;
+    transition: background-color 0.3s ease;
+}
+
+.test-btn:hover {
+    background: #38a169;
+}
+
+.test-results {
+    background: #f0fff4;
+    border-radius: 8px;
+    padding: 20px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    line-height: 1.8;
+    border: 1px solid #9ae6b4;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+    
+    header h1 {
+        font-size: 2rem;
+    }
+    
+    main {
+        padding: 20px;
+    }
+    
+    .input-group {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .result-item strong {
+        min-width: auto;
+        display: block;
+        margin-bottom: 5px;
+    }
+}
+
+@media (max-width: 480px) {
+    header h1 {
+        font-size: 1.7rem;
+    }
+    
+    header p {
+        font-size: 1rem;
+    }
+    
+    main {
+        padding: 15px;
+    }
+    
+    .form-section h2 {
+        font-size: 1.1rem;
+    }
+} 
