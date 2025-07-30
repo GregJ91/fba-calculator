@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FBA Calculator - Test Cases</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .test-container {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .test-case {
+            background: white;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #007bff;
+        }
+        
+        .test-case.pass {
+            border-left-color: #28a745;
+        }
+        
+        .test-case.fail {
+            border-left-color: #dc3545;
+        }
+        
+        .test-header {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .test-details {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #666;
+        }
+        
+        .summary {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 6px;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .summary.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .summary.warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .manual-test {
+            background: #e7f3ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 6px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        
+        .manual-test h3 {
+            color: #0066cc;
+            margin-top: 0;
+        }
+        
+        .test-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .test-input {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .test-input label {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .test-input input, .test-input select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .test-button:hover {
+            background: #0056b3;
+        }
+        
+        .manual-result {
+            background: white;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 15px;
+            border-left: 4px solid #007bff;
+        }
+    </style>
+</head>
+<body>
+    <h1>FBA Calculator - Test Cases</h1>
+    <p>This page verifies that the FBA size tier selection logic works correctly for various product dimensions and weights.</p>
+
+    <button onclick="runAllTests()" class="test-button" style="margin-bottom: 20px;">Run All Automated Tests</button>
+
+    <div id="testResults" class="test-container">
+        <h2>Test Results</h2>
+        <p>Click "Run All Automated Tests" to see the results...</p>
+    </div>
+
+    <div class="manual-test">
+        <h3>Manual Test Input</h3>
+        <p>Use this form to manually test specific dimensions and weights:</p>
+        
+        <div class="test-form">
+            <div class="test-input">
+                <label for="testHeight">Height (cm)</label>
+                <input type="number" id="testHeight" step="0.1" min="0" placeholder="10.5">
+            </div>
+            <div class="test-input">
+                <label for="testWidth">Width (cm)</label>
+                <input type="number" id="testWidth" step="0.1" min="0" placeholder="15.0">
+            </div>
+            <div class="test-input">
+                <label for="testDepth">Depth (cm)</label>
+                <input type="number" id="testDepth" step="0.1" min="0" placeholder="2.0">
+            </div>
+            <div class="test-input">
+                <label for="testWeight">Weight (kg)</label>
+                <input type="number" id="testWeight" step="0.001" min="0" placeholder="0.150">
+            </div>
+        </div>
+        
+        <button onclick="runManualTest()" class="test-button">Test These Dimensions</button>
+        
+        <div id="manualResult" class="manual-result" style="display: none;">
+            <h4>Result:</h4>
+            <div id="manualResultContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // Import the FBA Calculator logic
+        // FBA Size Tier Configuration (updated with correct weight brackets)
+        const FBA_SIZE_TIERS = {
+            SMALL_ENVELOPE: {
+                name: 'Small envelope',
+                maxDimensions: [20, 15, 1],
+                maxUnitWeight: 0.08,
+                maxDimensionalWeight: null
+            },
+            STANDARD_ENVELOPE: {
+                name: 'Standard envelope', 
+                maxDimensions: [33, 23, 2.5],
+                maxUnitWeight: 0.46,
+                maxDimensionalWeight: null
+            },
+            LARGE_ENVELOPE: {
+                name: 'Large envelope',
+                maxDimensions: [33, 23, 4],
+                maxUnitWeight: 0.96,
+                maxDimensionalWeight: null
+            },
+            EXTRA_LARGE_ENVELOPE: {
+                name: 'Extra-large envelope',
+                maxDimensions: [33, 23, 6],
+                maxUnitWeight: 0.96,
+                maxDimensionalWeight: null
+            },
+            SMALL_PARCEL: {
+                name: 'Small parcel',
+                maxDimensions: [35, 25, 12],
+                maxUnitWeight: 3.9,
+                maxDimensionalWeight: 3.9
+            },
+            STANDARD_PARCEL: {
+                name: 'Standard parcel',
+                maxDimensions: [45, 34, 26],
+                maxUnitWeight: 11.9,
+                maxDimensionalWeight: 11.9
+            },
+            SMALL_OVERSIZE: {
+                name: 'Small oversize',
+                maxDimensions: [61, 46, 46],
+                maxUnitWeight: 1.76,
+                maxDimensionalWeight: 25.82
+            },
+            STANDARD_OVERSIZE: {
+                name: 'Standard oversize', 
+                maxDimensions: [120, 60, 60],
+                maxUnitWeight: 29.76,
+                maxDimensionalWeight: 86.4
+            },
+            LARGE_OVERSIZE: {
+                name: 'Large oversize',
+                maxDimensions: null,
+                maxUnitWeight: 31.5,
+                maxDimensionalWeight: 108
+            },
+            SPECIAL_OVERSIZE: {
+                name: 'Special oversize',
+                maxDimensions: null,
+                maxUnitWeight: null,
+                maxDimensionalWeight: null
+            }
+        };
+
+        // Test logic functions
+        function determineSizeTier(dimensions, unitWeight, dimensionalWeight = null) {
+            const { height, width, depth } = dimensions;
+            const sortedDims = [height, width, depth].sort((a, b) => b - a);
+            const [length, widthSorted, heightSorted] = sortedDims;
+
+            // Calculate dimensional weight if not provided
+            if (dimensionalWeight === null) {
+                dimensionalWeight = calculateDimensionalWeight(length, widthSorted, heightSorted);
+            }
+
+            // Calculate girth for special oversize check
+            const girth = calculateGirth(length, widthSorted, heightSorted);
+
+            // Check each tier in order from smallest to largest
+            if (fitsInDimensions(sortedDims, [20, 15, 1]) && unitWeight <= 0.08) {
+                return FBA_SIZE_TIERS.SMALL_ENVELOPE;
+            }
+            if (fitsInDimensions(sortedDims, [33, 23, 2.5]) && unitWeight <= 0.46) {
+                return FBA_SIZE_TIERS.STANDARD_ENVELOPE;
+            }
+            if (fitsInDimensions(sortedDims, [33, 23, 4]) && unitWeight <= 0.96) {
+                return FBA_SIZE_TIERS.LARGE_ENVELOPE;
+            }
+            if (fitsInDimensions(sortedDims, [33, 23, 6]) && unitWeight <= 0.96) {
+                return FBA_SIZE_TIERS.EXTRA_LARGE_ENVELOPE;
+            }
+            if (fitsInDimensions(sortedDims, [35, 25, 12]) && unitWeight <= 3.9 && dimensionalWeight <= 3.9) {
+                return FBA_SIZE_TIERS.SMALL_PARCEL;
+            }
+            if (fitsInDimensions(sortedDims, [45, 34, 26]) && unitWeight <= 11.9 && dimensionalWeight <= 11.9) {
+                return FBA_SIZE_TIERS.STANDARD_PARCEL;
+            }
+            if (fitsInDimensions(sortedDims, [61, 46, 46]) && unitWeight < 1.76 && dimensionalWeight < 25.82) {
+                return FBA_SIZE_TIERS.SMALL_OVERSIZE;
+            }
+            if (fitsInDimensions(sortedDims, [120, 60, 60]) && unitWeight < 29.76 && dimensionalWeight < 86.4) {
+                return FBA_SIZE_TIERS.STANDARD_OVERSIZE;
+            }
+            if (!fitsInDimensions(sortedDims, [120, 60, 60]) && unitWeight < 31.5 && dimensionalWeight > 108) {
+                return FBA_SIZE_TIERS.LARGE_OVERSIZE;
+            }
+            
+            // Special oversize: Longest side > 175 or girth > 360 (only if doesn't fit other categories)
+            if (length > 175 || girth > 360) {
+                return FBA_SIZE_TIERS.SPECIAL_OVERSIZE;
+            }
+            
+            return FBA_SIZE_TIERS.SPECIAL_OVERSIZE;
+        }
+
+        function calculateDimensionalWeight(length, width, height) {
+            // Amazon's dimensional weight formula: (L × W × H) / 5000 for cm to kg
+            return (length * width * height) / 5000;
+        }
+
+        function calculateGirth(length, width, height) {
+            return 2 * (width + height) + length;
+        }
+
+        function fitsInDimensions(itemDims, maxDims) {
+            return itemDims[0] <= maxDims[0] && 
+                   itemDims[1] <= maxDims[1] && 
+                   itemDims[2] <= maxDims[2];
+        }
+
+        // Test cases
+        const testCases = [
+            {
+                name: 'Very small envelope (10x8x0.5)',
+                dimensions: { height: 10, width: 8, depth: 0.5 },
+                weight: 0.05,
+                expectedTier: 'Small envelope',
+                description: 'Fits well within small envelope limits'
+            },
+            {
+                name: 'Maximum small envelope (20x15x1)',
+                dimensions: { height: 20, width: 15, depth: 1 },
+                weight: 0.08,
+                expectedTier: 'Small envelope',
+                description: 'Exactly at small envelope maximum dimensions'
+            },
+            {
+                name: 'Just over small envelope (20x15x1.1)',
+                dimensions: { height: 20, width: 15, depth: 1.1 },
+                weight: 0.1,
+                expectedTier: 'Standard envelope',
+                description: 'Slightly exceeds small envelope depth'
+            },
+            {
+                name: 'Standard envelope (30x20x2)',
+                dimensions: { height: 30, width: 20, depth: 2 },
+                weight: 0.1,
+                expectedTier: 'Standard envelope',
+                description: 'Fits within standard envelope limits'
+            },
+            {
+                name: 'Large envelope (32x22x3.5)',
+                dimensions: { height: 32, width: 22, depth: 3.5 },
+                weight: 0.2,
+                expectedTier: 'Large envelope',
+                description: 'Fits within large envelope limits'
+            },
+            {
+                name: 'Extra-large envelope (40x30x5)',
+                dimensions: { height: 40, width: 30, depth: 5 },
+                weight: 0.3,
+                expectedTier: 'Extra-large envelope',
+                description: 'Fits within extra-large envelope limits'
+            },
+            {
+                name: 'Small parcel - light weight (30x20x10, 0.8kg)',
+                dimensions: { height: 30, width: 20, depth: 10 },
+                weight: 0.8,
+                expectedTier: 'Small parcel',
+                description: 'Within small parcel dimensions and weight limit'
+            },
+            {
+                name: 'Small parcel - heavy weight (30x20x10, 1.5kg)',
+                dimensions: { height: 30, width: 20, depth: 10 },
+                weight: 1.5,
+                expectedTier: 'Standard parcel',
+                description: 'Same dimensions but exceeds small parcel weight limit'
+            },
+            {
+                name: 'Standard parcel (40x30x20, 2.0kg)',
+                dimensions: { height: 40, width: 30, depth: 20 },
+                weight: 2.0,
+                expectedTier: 'Standard parcel',
+                description: 'Larger than small parcel dimensions'
+            },
+            {
+                name: 'Small oversize (55x40x40, 5kg)',
+                dimensions: { height: 55, width: 40, depth: 40 },
+                weight: 5.0,
+                expectedTier: 'Small oversize',
+                description: 'Exceeds standard parcel but within small oversize'
+            },
+            {
+                name: 'Standard oversize (100x50x50, 15kg)',
+                dimensions: { height: 100, width: 50, depth: 50 },
+                weight: 15.0,
+                expectedTier: 'Standard oversize',
+                description: 'Large dimensions, moderate weight'
+            },
+            {
+                name: 'Special oversize (150x80x80, 50kg)',
+                dimensions: { height: 150, width: 80, depth: 80 },
+                weight: 50.0,
+                expectedTier: 'Special oversize',
+                description: 'Exceeds all standard limits'
+            }
+        ];
+
+        function runAllTests() {
+            let html = '<h2>Automated Test Results</h2>';
+            let passed = 0;
+            let total = testCases.length;
+
+            testCases.forEach((test, index) => {
+                const { height, width, depth } = test.dimensions;
+                const sortedDims = [height, width, depth].sort((a, b) => b - a);
+                const dimensionalWeight = calculateDimensionalWeight(sortedDims[0], sortedDims[1], sortedDims[2]);
+                
+                const tier = determineSizeTier(test.dimensions, test.weight, dimensionalWeight);
+                const success = tier.name === test.expectedTier;
+                
+                if (success) passed++;
+
+                html += `
+                    <div class="test-case ${success ? 'pass' : 'fail'}">
+                        <div class="test-header">
+                            ${success ? '✅' : '❌'} Test ${index + 1}: ${test.name}
+                        </div>
+                        <div class="test-details">
+                            Description: ${test.description}<br>
+                            Dimensions: ${test.dimensions.height} × ${test.dimensions.width} × ${test.dimensions.depth} cm<br>
+                            Unit Weight: ${test.weight} kg<br>
+                            Dimensional Weight: ${dimensionalWeight.toFixed(3)} kg<br>
+                            Expected: ${test.expectedTier}<br>
+                            Got: ${tier.name}<br>
+                            Status: <strong>${success ? 'PASS' : 'FAIL'}</strong>
+                        </div>
+                    </div>
+                `;
+            });
+
+            const successRate = (passed / total * 100).toFixed(1);
+            const summaryClass = passed === total ? 'success' : 'warning';
+
+            html += `
+                <div class="summary ${summaryClass}">
+                    Tests Completed: ${passed}/${total} passed (${successRate}%)
+                </div>
+            `;
+
+            document.getElementById('testResults').innerHTML = html;
+        }
+
+        function runManualTest() {
+            const height = parseFloat(document.getElementById('testHeight').value);
+            const width = parseFloat(document.getElementById('testWidth').value);
+            const depth = parseFloat(document.getElementById('testDepth').value);
+            const weight = parseFloat(document.getElementById('testWeight').value);
+
+            if (!height || !width || !depth || weight === '') {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            const dimensions = { height, width, depth };
+            const sortedDims = [height, width, depth].sort((a, b) => b - a);
+            const dimensionalWeight = calculateDimensionalWeight(sortedDims[0], sortedDims[1], sortedDims[2]);
+            const tier = determineSizeTier(dimensions, weight, dimensionalWeight);
+
+            const resultHtml = `
+                <strong>Size Tier:</strong> ${tier.name}<br>
+                <strong>Input Dimensions:</strong> ${height} × ${width} × ${depth} cm<br>
+                <strong>Sorted Dimensions:</strong> ${sortedDims[0]} × ${sortedDims[1]} × ${sortedDims[2]} cm (L×W×H)<br>
+                <strong>Unit Weight:</strong> ${weight} kg<br>
+                <strong>Dimensional Weight:</strong> ${dimensionalWeight.toFixed(3)} kg<br>
+                <strong>Reasoning:</strong> ${getReasoningForTier(dimensions, weight, tier, dimensionalWeight)}
+            `;
+
+            document.getElementById('manualResultContent').innerHTML = resultHtml;
+            document.getElementById('manualResult').style.display = 'block';
+        }
+
+        function getReasoningForTier(dimensions, unitWeight, tier, dimensionalWeight) {
+            const sortedDims = [dimensions.height, dimensions.width, dimensions.depth].sort((a, b) => b - a);
+            const [length, width, height] = sortedDims;
+            const girth = calculateGirth(length, width, height);
+            
+            switch(tier.name) {
+                case 'Small envelope':
+                    return `Fits within 20×15×1 cm AND ≤ 80g (${Math.round(unitWeight * 1000)}g)`;
+                case 'Standard envelope':
+                    return `Fits within 33×23×2.5 cm AND ≤ 460g (${Math.round(unitWeight * 1000)}g)`;
+                case 'Large envelope':
+                    return `Fits within 33×23×4 cm AND ≤ 960g (${Math.round(unitWeight * 1000)}g)`;
+                case 'Extra-large envelope':
+                    return `Fits within 33×23×6 cm AND ≤ 960g (${Math.round(unitWeight * 1000)}g)`;
+                case 'Small parcel':
+                    return `Fits within 35×25×12 cm AND unit weight ≤ 3.9kg (${unitWeight}kg) AND dimensional weight ≤ 3.9kg (${dimensionalWeight.toFixed(3)}kg)`;
+                case 'Standard parcel':
+                    return `Fits within 45×34×26 cm AND unit weight ≤ 11.9kg (${unitWeight}kg) AND dimensional weight ≤ 11.9kg (${dimensionalWeight.toFixed(3)}kg)`;
+                case 'Small oversize':
+                    return `Fits within 61×46×46 cm AND unit weight < 1.76kg (${unitWeight}kg) AND dimensional weight < 25.82kg (${dimensionalWeight.toFixed(3)}kg)`;
+                case 'Standard oversize':
+                    return `Fits within 120×60×60 cm AND unit weight < 29.76kg (${unitWeight}kg) AND dimensional weight < 86.4kg (${dimensionalWeight.toFixed(3)}kg)`;
+                case 'Large oversize':
+                    return `Exceeds 120×60×60 cm (${length}×${width}×${height}) AND unit weight < 31.5kg (${unitWeight}kg) AND dimensional weight > 108kg (${dimensionalWeight.toFixed(3)}kg)`;
+                case 'Special oversize':
+                    return length > 175 ? 
+                        `Longest side > 175cm (${length}cm)` :
+                        girth > 360 ? 
+                        `Girth > 360cm (${girth.toFixed(1)}cm)` :
+                        `Exceeds all other tier limits`;
+                default:
+                    return 'Classification logic applied';
+            }
+        }
+
+        // Auto-run tests on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            runAllTests();
+        });
+    </script>
+</body>
+</html> 

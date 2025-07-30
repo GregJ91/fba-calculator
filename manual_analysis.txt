@@ -1,0 +1,75 @@
+MANUAL ANALYSIS OF FAILING TEST CASES
+=====================================
+
+Key Issue Analysis:
+
+1. "Small Envelope - Exceeds weight" (90g)
+   - Dimensions: 20x15x1 cm
+   - Weight: 0.09kg (90g) 
+   - Expected: Standard envelope, <= 210g, GBP 2.07
+   - Logic Check:
+     * Does NOT fit Small envelope (90g > 80g limit)
+     * DOES fit Standard envelope dimensions (≤ 33x23x2.5) and weight (90g ≤ 460g)
+     * Weight bracket: 90g falls in <= 210g bracket
+     * Expected price: GBP 2.07
+     * Current FBA_FEES: Standard envelope 0.21 (210g): 2.07 ✅
+     * This should work correctly
+
+2. "Large Envelope - Exceeds weight" (970g)
+   - Dimensions: 33x23x4 cm
+   - Weight: 0.97kg (970g)
+   - Expected: Extra-large envelope, <= 960g, GBP 2.95
+   - Logic Check:
+     * Does NOT fit Large envelope (970g > 960g limit)
+     * DOES fit Extra-large envelope dimensions (≤ 33x23x6) and weight (970g ≤ 1500g)
+     * Weight bracket: 970g falls in <= 960g bracket (ISSUE: this is wrong!)
+     * Expected price: GBP 2.95
+     * Current FBA_FEES: Extra-large envelope 0.96 (960g): 2.95 ✅
+     * ISSUE: Weight bracket logic is wrong - 970g should be in 1.5kg bracket, not 960g bracket
+
+3. "Small Oversize - Exceeds weight" (1.77kg)
+   - Dimensions: 61x46x46 cm  
+   - Weight: 1.77kg
+   - Expected: Standard oversize, <= 1.76kg, GBP 6.67
+   - Logic Check:
+     * Does NOT fit Small oversize (1.77kg > 1.76kg limit)
+     * DOES fit Standard oversize dimensions (≤ 120x60x60) and no weight limit
+     * Weight bracket: 1.77kg falls in <= 1.76kg bracket
+     * Expected price: GBP 6.67
+     * Current FBA_FEES: Standard oversize 1.76: 6.67 ✅
+     * This should work correctly
+
+4. "Extra-large Envelope - Exceeds weight" (1.51kg)
+   - Dimensions: 33x23x6 cm
+   - Weight: 1.51kg 
+   - Expected: Small parcel, <= 1.9kg, GBP 3.62
+   - Logic Check:
+     * Does NOT fit Extra-large envelope (1.51kg > 1.5kg limit)
+     * DOES fit Small parcel dimensions (≤ 35x25x12) and weight (1.51kg ≤ 3.9kg)
+     * Weight bracket: 1.51kg falls in <= 1.9kg bracket
+     * Expected price: GBP 3.62  
+     * Current FBA_FEES: Small parcel 1.9: 3.62 ✅
+     * This should work correctly
+
+IDENTIFIED ISSUES:
+=================
+
+1. Weight Bracket Logic Error:
+   - The findWeightBracket function incorrectly assigns items to brackets
+   - For 970g item expecting "≤ 960g" bracket but should be "≤ 1.5kg" bracket
+   - This suggests the weight bracket descriptions don't match the pricing logic
+
+2. Potential EXTRA_LARGE_ENVELOPE Weight Bracket Issue:
+   - CSV shows "≤ 960g" but pricing shows it should be ≤ 1.5kg
+   - Need to verify the weight brackets in FBA_SIZE_TIERS match the pricing structure
+
+3. Weight Bracket Description Mismatch:
+   - Test cases expect specific weight bracket descriptions that don't align with actual weight values
+   - 970g item should be in 1.5kg bracket, not 960g bracket
+
+CORRECTIONS NEEDED:
+==================
+
+1. Fix EXTRA_LARGE_ENVELOPE weight bracket logic
+2. Ensure weight bracket descriptions match actual weight ranges  
+3. Verify all tier weight limits against the pricing screenshot 

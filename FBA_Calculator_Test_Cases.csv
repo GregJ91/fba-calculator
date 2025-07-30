@@ -1,0 +1,21 @@
+Test Description,Height (cm),Width (cm),Depth (cm),Weight (kg),Weight (grams),Zone,Expected Tier,Expected Weight Bracket,Expected Price Range,Notes
+Small Oversize - Light package,61,46,46,0,760,UK,Small oversize,<= 760g,GBP 5.32,Minimum weight bracket
+Small Oversize - Medium weight,61,46,46,1,260,UK,Small oversize,<= 1.26kg,GBP 6.17,Medium weight bracket
+Small Oversize - Max weight,61,46,46,1,760,UK,Small oversize,<= 1.76kg,GBP 6.36,Maximum weight limit
+Small Oversize - Max dimensions,61,46,46,1,500,UK,Small oversize,<= 1.76kg,GBP 6.36,Maximum dimensions test
+Small Oversize - Exceeds weight,61,46,46,1,770,UK,Standard oversize,<= 2.76kg,GBP 6.82,Weight exceeds limit
+Standard Oversize - Light package,120,60,60,0,760,UK,Standard oversize,<= 760g,GBP 6.32,Minimum weight bracket
+Standard Oversize - Medium weight,120,60,60,4,760,UK,Standard oversize,<= 4.76kg,GBP 6.89,Medium weight bracket
+Standard Oversize - Heavy package,120,60,60,19,760,UK,Standard oversize,<= 19.76kg,GBP 9.24,Heavy package test
+Standard Oversize - Max base weight,120,60,60,29,760,UK,Standard oversize,<= 29.76kg,GBP 10.25,Maximum base weight
+Standard Oversize - Overweight,120,60,60,35,0,UK,Standard oversize,> 29.76kg,GBP 10.31,Exceeds base weight (10.25 + 6kg * 0.01)
+Large Oversize - Min dimensions,121,60,60,4,760,UK,Large oversize,<= 4.76kg,GBP 11.45,Minimum dimensions
+Large Oversize - Medium weight,130,70,70,14,760,UK,Large oversize,<= 14.76kg,GBP 13.22,Medium weight bracket
+Large Oversize - Heavy package,140,80,80,24,760,UK,Large oversize,<= 24.76kg,GBP 15.08,Heavy package test
+Large Oversize - Max weight,150,90,90,31,500,UK,Large oversize,<= 31.5kg,GBP 15.12,Maximum weight limit
+Large Oversize - High dimensional,160,100,100,20,0,UK,Large oversize,<= 19.76kg,GBP 13.86,High dimensional weight
+Special Oversize - Longest side,180,50,50,15,0,UK,Special oversize,< 20kg,GBP 15.43,Longest side > 175cm
+Special Oversize - High girth,100,100,100,15,0,UK,Special oversize,< 20kg,GBP 15.43,Girth > 360cm
+Special Oversize - Medium weight,120,80,80,25,0,UK,Special oversize,< 30kg,GBP 18.48,Medium weight bracket
+Special Oversize - Heavy package,150,75,75,55,0,UK,Special oversize,< 60kg,GBP 44.25,Heavy package test
+Special Oversize - Very heavy,200,100,100,65,0,UK,Special oversize,>= 60kg,GBP 44.25,Very heavy package 

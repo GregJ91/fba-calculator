@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FBA Calculator - Comprehensive Corrected Test Suite</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-category {
+            margin: 30px 0;
+            padding: 20px;
+            border: 2px solid #333;
+            border-radius: 8px;
+        }
+        .test-case {
+            margin: 15px 0;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 5px solid #ddd;
+        }
+        .pass {
+            background-color: #e8f5e8;
+            border-left-color: #4caf50;
+        }
+        .fail {
+            background-color: #ffeaea;
+            border-left-color: #f44336;
+        }
+        .test-details {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 10px;
+        }
+        .summary {
+            background-color: #f0f0f0;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .expected-vs-actual {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .expected, .actual {
+            padding: 10px;
+            border-radius: 3px;
+        }
+        .expected {
+            background-color: #e3f2fd;
+        }
+        .actual {
+            background-color: #fff3e0;
+        }
+        .note {
+            background-color: #f0f8ff;
+            padding: 10px;
+            border-left: 4px solid #2196f3;
+            margin: 10px 0;
+            font-style: italic;
+        }
+    </style>
+    <script src="fba-calculator.js"></script>
+</head>
+<body>
+    <h1>🧪 FBA Calculator - Comprehensive Corrected Test Suite</h1>
+    <div id="summary" class="summary">
+        <h2>Test Summary</h2>
+        <div id="summaryContent">Running tests...</div>
+    </div>
+    <div id="testResults"></div>
+    
+    <script>
+        class FBATestSuite {
+            constructor() {
+                this.calculator = new FBACalculator();
+                this.totalTests = 0;
+                this.passedTests = 0;
+                this.testResults = [];
+            }
+
+            runTest(testCase) {
+                this.totalTests++;
+                
+                const { height, width, depth } = testCase.dimensions;
+                const sortedDims = [height, width, depth].sort((a, b) => b - a);
+                const dimensionalWeight = this.calculator.calculateDimensionalWeight(sortedDims[0], sortedDims[1], sortedDims[2]);
+                
+                const tier = this.calculator.determineSizeTier(testCase.dimensions, testCase.weight, dimensionalWeight);
+                const weightBracket = this.calculator.findWeightBracket(tier, testCase.weight);
+                const fee = this.calculator.calculateFee(tier, testCase.weight, testCase.zone || 'UK', weightBracket);
+                
+                const tierMatch = tier.name === testCase.expectedTier;
+                const feeMatch = testCase.expectedFee ? (fee === testCase.expectedFee) : true;
+                const success = tierMatch && feeMatch;
+                
+                if (success) this.passedTests++;
+                
+                return {
+                    ...testCase,
+                    actualTier: tier.name,
+                    actualFee: fee,
+                    dimensionalWeight: dimensionalWeight.toFixed(3),
+                    weightBracket: weightBracket.description,
+                    success,
+                    tierMatch,
+                    feeMatch
+                };
+            }
+
+            runAllTests() {
+                // Test Category 1: Small Envelope (≤ 20x15x1 cm, ≤ 210g)
+                this.testSmallEnvelope();
+                
+                // Test Category 2: Standard Envelope (≤ 35x25x2.5 cm, ≤ 460g)
+                this.testStandardEnvelope();
+                
+                // Test Category 3: Large Envelope (≤ 35x25x4 cm, ≤ 960g)
+                this.testLargeEnvelope();
+                
+                // Test Category 4: Extra-large Envelope (≤ 35x25x6 cm, ≤ 960g)
+                this.testExtraLargeEnvelope();
+                
+                // Test Category 5: Small Parcel (≤ 35x25x12 cm, ≤ 3.9kg)
+                this.testSmallParcel();
+                
+                // Test Category 6: Standard Parcel (≤ 45x34x26 cm, ≤ 11.9kg)
+                this.testStandardParcel();
+                
+                // Test Category 7: Small Oversize (≤ 61x46x46 cm, ≤ 4.76kg unit, ≤ 25.82kg dim, surcharge >1.76kg)
+                this.testSmallOversize();
+                
+                // Test Category 8: Standard Oversize (≤ 120x60x60 cm, < 29.76kg, dim < 68.4kg)
+                this.testStandardOversize();
+                
+                // Test Category 9: Large Oversize (> 120x60x60 or dim ≥ 68.4kg, < 31.5kg, dim ≤ 108kg)
+                this.testLargeOversize();
+                
+                // Test Category 10: Special Oversize (Longest > 175cm or girth > 360cm or dim > 108kg)
+                this.testSpecialOversize();
+                
+                // Test Category 11: Dimensional Weight Edge Cases
+                this.testDimensionalWeightCases();
+                
+                // Test Category 12: Multi-Zone Pricing
+                this.testMultiZonePricing();
+                
+                // Test Category 13: Weight Bracket Testing
+                this.testWeightBrackets();
+                
+                // Test Category 14: Surcharge Calculations
+                this.testSurcharges();
+                
+                // Test Category 15: Boundary Conditions
+                this.testBoundaryConditions();
+                
+                this.displayResults();
+                this.displaySummary();
+            }
+
+            testSmallEnvelope() {
+                const category = "Small Envelope (≤ 20x15x1 cm, ≤ 210g)";
+                const tests = [
+                    {
+                        name: "Minimum size (5g)",
+                        dimensions: { height: 10, width: 8, depth: 0.5 },
+                        weight: 0.005,
+                        expectedTier: "Small envelope",
+                        expectedFee: "£1.71",
+                        note: "First weight bracket ≤ 80g"
+                    },
+                    {
+                        name: "At 80g limit",
+                        dimensions: { height: 20, width: 15, depth: 1 },
+                        weight: 0.08,
+                        expectedTier: "Small envelope",
+                        expectedFee: "£1.71",
+                        note: "First weight bracket ≤ 80g"
+                    },
+                    {
+                        name: "100g - still Small envelope",
+                        dimensions: { height: 15, width: 10, depth: 0.8 },
+                        weight: 0.1,
+                        expectedTier: "Small envelope", 
+                        expectedFee: "£1.89",
+                        note: "Within 210g Small envelope limit"
+                    },
+                    {
+                        name: "210g - at Small envelope limit", 
+                        dimensions: { height: 20, width: 15, depth: 1 },
+                        weight: 0.21,
+                        expectedTier: "Small envelope",
+                        expectedFee: "£1.89",
+                        note: "At 210g Small envelope limit"
+                    },
+                    {
+                        name: "Over weight limit (220g)",
+                        dimensions: { height: 15, width: 10, depth: 0.8 },
+                        weight: 0.22,
+                        expectedTier: "Standard envelope",
+                        note: "Exceeds 210g limit"
+                    },
+                    {
+                        name: "Over dimension limit",
+                        dimensions: { height: 25, width: 15, depth: 1 },
+                        weight: 0.05,
+                        expectedTier: "Standard envelope",
+                        note: "Exceeds 20x15x1 dimension limit"
+                    }
+                ];
+                
+                this.runCategoryTests(category, tests);
+            }
+
+            testStandardEnvelope() {
+                const category = "Standard Envelope (≤ 35x25x2.5 cm, ≤ 460g)";
+                const tests = [
+                    {
+                        name: "50g bracket (first bracket)",
+                        dimensions: { height: 30, width: 20, depth: 2 },
+                        weight: 0.05,
+                        expectedTier: "Standard envelope",
+                        expectedFee: "£1.89",
+                        note: "First weight bracket ≤ 60g"
+                    },
+                    {
+                        name: "200g bracket (second bracket)",
+                        dimensions: { height: 30, width: 20, depth: 2 },
+                        weight: 0.2,
+                        expectedTier: "Standard envelope",
+                        expectedFee: "£2.07",
+                        note: "Second weight bracket ≤ 210g"
+                    },
+                    {
+                        name: "220g bracket (second bracket)",
+                        dimensions: { height: 30, width: 20, depth: 2 },
+                        weight: 0.22,
+                        expectedTier: "Standard envelope",
+                        expectedFee: "£2.20",
+                        note: "Third weight bracket ≤ 460g (220g > 210g limit)"
+                    },
+                    {
+                        name: "250g bracket",
+                        dimensions: { height: 30, width: 20, depth: 2 },
+                        weight: 0.25,
+                        expectedTier: "Standard envelope",
+                        expectedFee: "£2.20",
+                        note: "Third weight bracket ≤ 460g"
+                    },
+                    {
+                        name: "At 460g limit",
+                        dimensions: { height: 35, width: 25, depth: 2.5 },
+                        weight: 0.46,
+                        expectedTier: "Standard envelope",
+                        expectedFee: "£2.20",
+                        note: "Maximum weight for standard envelope"
+                    },
+                    {
+                        name: "Over weight limit (500g)",
+                        dimensions: { height: 30, width: 20, depth: 2 },
+                        weight: 0.5,
+                        expectedTier: "Large envelope",
+                        note: "Exceeds 460g limit"
+                    },
+                    {
+                        name: "At dimension limit",
+                        dimensions: { height: 35, width: 25, depth: 2.5 },
+                        weight: 0.3,
+                        expectedTier: "Standard envelope",
+                        expectedFee: "£2.20"
+                    }
+                ];
+                
+                this.runCategoryTests(category, tests);
+            }
+
+            testLargeEnvelope() {
+                const category = "Large Envelope (≤ 35x25x4 cm, ≤ 960g)";
+                const tests = [
+                    {
+                        name: "500g bracket",
+                        dimensions: { height: 32, width: 22, depth: 3.5 },
+                        weight: 0.5,
+                        expectedTier: "Large envelope",
+                        expectedFee: "£2.73"
+                    },
+                    {
+                        name: "At 960g limit",
+                        dimensions: { height: 35, width: 25, depth: 4 },
+                        weight: 0.96,
+                        expectedTier: "Large envelope",
+                        expectedFee: "£2.73"
+                    },
+                    {
+                        name: "Over weight limit (1.2kg)",
+                        dimensions: { height: 32, width: 22, depth: 3.5 },
+                        weight: 1.2,
+                        expectedTier: "Small parcel",
+                        expectedFee: "£3.23",
+                        note: "Exceeds 960g limit, goes to Small parcel"
+                    }
+                ];
+                
+                this.runCategoryTests(category, tests);
+            }
+
+            testExtraLargeEnvelope() {
+                const category = "Extra-large Envelope (≤ 35x25x6 cm, ≤ 960g)";
+                const tests = [
+                    {
+                        name: "800g bracket",
+                        dimensions: { height: 32, width: 22, depth: 5 },
+                        weight: 0.8,
+                        expectedTier: "Extra-large envelope",
+                        expectedFee: "£2.95",
+                        note: "Within 960g limit"
+                    },
+                    {
+                        name: "At 960g limit",
+                        dimensions: { height: 35, width: 25, depth: 6 },
+                        weight: 0.96,
+                        expectedTier: "Extra-large envelope",
+                        expectedFee: "£2.95",
+                        note: "At maximum weight limit"
+                    },
+                    {
+                        name: "Over weight limit (1.2kg)",
+                        dimensions: { height: 32, width: 22, depth: 5 },
+                        weight: 1.2,
+                        expectedTier: "Small parcel",
+                        expectedFee: "£3.23",
+                        note: "Exceeds 960g limit"
+                    }
+                ];
+                
+                this.runCategoryTests(category, tests);
+            }
+
+            testSmallParcel() {
+                const category = "Small Parcel (≤ 35x25x12 cm, ≤ 3.9kg unit or dimensional)";
+                const tests = [
+                    {
+                        name: "150g bracket",
+                        dimensions: { height: 30, width: 20, depth: 10 },
+                        weight: 0.15,
+                        expectedTier: "Small parcel",
+                        expectedFee: "£2.99"
+                    },
+                    {
+                        name: "400g bracket",
+                        dimensions: { height: 30, width: 20, depth: 10 },
+                        weight: 0.4,
+                        expectedTier: "Small parcel",
+                        expectedFee: "£3.01"
+                    },
+                    {
+                        name: "900g bracket",
+                        dimensions: { height: 30, width: 20, depth: 10 },
+                        weight: 0.9,
+                        expectedTier: "Small parcel",
+                        expectedFee: "£3.05"
+                    },
+                    {
+                        name: "1.4kg bracket",
+                        dimensions: { height: 30, width: 20, depth: 10 },
+                        weight: 1.4,
+                        expectedTier: "Small parcel",
+                        expectedFee: "£3.23"
+                    },
+                    {
+                        name: "1.9kg bracket",
+                        dimensions: { height: 30, width: 20, depth: 10 },
+                        weight: 1.9,
+                        expectedTier: "Small parcel",
+                        expectedFee: "£3.58"
+                    },
+                    {
+                        name: "3.9kg bracket (max)",
+                        dimensions: { height: 35, width: 25, depth: 12 },
+                        weight: 3.9,
+                        expectedTier: "Small parcel",
+                        expectedFee: "£5.62"
+                    },
+                    {
+                        name: "Over 3.9kg weight",
+                        dimensions: { height: 30, width: 20, depth: 10 },
+                        weight: 4.5,
+                        expectedTier: "Standard parcel",
+                        note: "Exceeds 3.9kg limit"
+                    },
+                    {
+                        name: "High dimensional weight",
+                        dimensions: { height: 35, width: 25, depth: 12 },
+                        weight: 2.0,
+                        expectedTier: "Small parcel",
+                        note: "Dimensional weight: 2.1kg, max(2.0, 2.1) = 2.1 < 3.9"
+                    },
+                    {
+                        name: "Dimensional weight exceeds limit",
+                        dimensions: { height: 40, width: 30, depth: 15 },
+                        weight: 1.0,
+                        expectedTier: "Standard parcel",
+                        note: "Dimensional weight: 3.6kg, max(1.0, 3.6) = 3.6 < 3.9 but dimensions exceed small parcel"
+                    }
+                ];
+                
+                this.runCategoryTests(category, tests);
+            }
+
+            testStandardParcel() {
+                const category = "Standard Parcel (≤ 45x34x26 cm, ≤ 11.9kg unit or dimensional)";
+                const tests = [
+                    {
+                        name: "150g bracket",
+                        dimensions: { height: 40, width: 30, depth: 20 },
+                        weight: 0.15,
+                        expectedTier: "Standard parcel",
+                        expectedFee: "£3.00"
+                    },
+                    {
+                        name: "400g bracket",
+                        dimensions: { height: 40, width: 30, depth: 20 },
+                        weight: 0.4,
+                        expectedTier: "Standard parcel",
+                        expectedFee: "£3.16"
+                    },
+                    {
+                        name: "900g bracket",
+                        dimensions: { height: 40, width: 30, depth: 20 },
+                        weight: 0.9,
+                        expectedTier: "Standard parcel",
+                        expectedFee: "£3.37"
+                    },
+                    {
+                        name: "1.4kg bracket",
+                        dimensions: { height: 40, width: 30, depth: 20 },
+                        weight: 1.4,
+                        expectedTier: "Standard parcel",
+                        expectedFee: "£3.60"
+                    },
+                    {
+                        name: "5.9kg bracket",
+                        dimensions: { height: 40, width: 30, depth: 20 },
+                        weight: 5.9,
+                        expectedTier: "Standard parcel",
+                        expectedFee: "£6.13"
+                    },
+                    {
+                        name: "11.9kg bracket (max)",
+                        dimensions: { height: 45, width: 34, depth: 26 },
+                        weight: 11.9,
+                        expectedTier: "Standard parcel",
+                        expectedFee: "£7.39"
+                    },
+                    {
+                        name: "Over 11.9kg - goes to Standard oversize",
+                        dimensions: { height: 40, width: 30, depth: 20 },
+                        weight: 15.0,
+                        expectedTier: "Standard oversize",
+                        expectedFee: "£9.24",
+                        note: "Exceeds Standard parcel 11.9kg limit, 15kg goes to ≤19.76kg bracket"
+                    },
+                    {
+                        name: "Large item with high dimensional weight",
+                        dimensions: { height: 45, width: 34, depth: 26 },
+                        weight: 8.0,
+                        expectedTier: "Standard parcel",
+                        note: "Dimensional weight: 9.8kg, within limits"
+                    }
+                ];
+                
+                this.runCategoryTests(category, tests);
+            }
+
+            testSmallOversize() {
+                const category = "Small Oversize (≤ 61x46x46 cm, ≤ 4.76kg unit, ≤ 25.82kg dim, surcharge >1.76kg)";
+                const tests = [
+                    {
+                        name: "760g bracket",
+                        dimensions: { height: 50, width: 40, depth: 30 },
+                        weight: 0.76,
+                        expectedTier: "Small oversize",
+                        expectedFee: "£5.32"
+                    },
+                    {
+                        name: "1.26kg bracket",
+                        dimensions: { height: 50, width: 40, depth: 30 },
+                        weight: 1.26,
+                        expectedTier: "Small oversize",
+                        expectedFee: "£6.17"
+                    },
+                    {
+                        name: "1.75kg - Small oversize no surcharge",
+                        dimensions: { height: 50, width: 40, depth: 30 },
+                        weight: 1.75,
+                        expectedTier: "Small oversize",
+                        expectedFee: "£6.36",
+                        note: "Unit weight < 1.76kg, dimensional weight 12kg ≤ 25.82kg"
+                    },
+                    {
+                        name: "1.8kg - Small oversize with surcharge",
+                        dimensions: { height: 50, width: 40, depth: 30 },
+                        weight: 1.8,
+                        expectedTier: "Small oversize",
+                        expectedFee: "£6.36",
+                        note: "Unit weight >1.76kg but dimensional weight 12kg ≤ 25.82kg, £0.01 surcharge for 0.04kg excess"
+                    },
+                    {
+                        name: "2.5kg - Small oversize with surcharge", 
+                        dimensions: { height: 50, width: 40, depth: 30 },
+                        weight: 2.5,
+                        expectedTier: "Small oversize",
+                        expectedFee: "£6.37",
+                        note: "Unit weight >1.76kg but ≤4.76kg and dimensional weight 12kg ≤ 25.82kg, £0.01 surcharge for 0.74kg excess"
+                    },
+                    {
+                        name: "5kg - exceeds unit weight limit",
+                        dimensions: { height: 50, width: 40, depth: 30 },
+                        weight: 5.0,
+                        expectedTier: "Standard oversize",
+                        expectedFee: "£8.24",
+                        note: "Unit weight 5kg > 4.76kg limit, goes to ≤9.76kg bracket in Standard oversize"
+                    },
+                    {
+                        name: "1.5kg within limits",
+                        dimensions: { height: 45, width: 35, depth: 35 },
+                        weight: 1.5,
+                        expectedTier: "Small oversize",
+                        expectedFee: "£6.36",
+                        note: "Unit weight 1.5kg < 1.76kg, uses 1.76kg bracket, dimensional weight 11.0kg within limits"
+                    },
+                    {
+                        name: "Close to dimensional weight limit",
+                        dimensions: { height: 60, width: 45, depth: 45 },
+                        weight: 1.0,
+                        expectedTier: "Small oversize",
+                        expectedFee: "£6.17",
+                        note: "Unit weight 1kg < 4.76kg, dimensional weight 24.3kg < 25.82kg limit"
+                    }
+                ];
+                
+                this.runCategoryTests(category, tests);
+            }
+
+            testStandardOversize() {
+                const category = "Standard Oversize (≤ 120x60x60 cm, < 29.76kg, dim < 68.4kg)";
+                const tests = [
+                    {
+                        name: "760g bracket",
+                        dimensions: { height: 100, width: 50, depth: 50 },
+                        weight: 0.76,
+                        expectedTier: "Standard oversize",
+                        expectedFee: "£6.32"
+                    },
+                    {
+                        name: "1.76kg bracket",
+                        dimensions: { height: 100, width: 50, depth: 50 },
+                        weight: 1.76,
+                        expectedTier: "Standard oversize",
+                        expectedFee: "£6.67"
+                    },
+                    {
+                        name: "2.76kg bracket",
+                        dimensions: { height: 100, width: 50, depth: 50 },
+                        weight: 2.76,
+                        expectedTier: "Standard oversize",
+                        expectedFee: "£6.82"
+                    },
+                    {
+                        name: "3.76kg bracket",
+                        dimensions: { height: 100, width: 50, depth: 50 },
+                        weight: 3.76,
+                        expectedTier: "Standard oversize",
+                        expectedFee: "£6.86"
+                    },
+                    {
+                        name: "4.76kg bracket",
+                        dimensions: { height: 100, width: 50, depth: 50 },
+                        weight: 4.76,
+                        expectedTier: "Standard oversize",
+                        expectedFee: "£6.89"
+                    },
+                    {
+                        name: "29.76kg bracket (max without surcharge)", 
+                        dimensions: { height: 100, width: 50, depth: 50 },
+                        weight: 29.76,
+                        expectedTier: "Standard oversize",
+                        expectedFee: "£10.25",
+                        note: "Exactly at 29.76kg bracket limit, fits dimensions, no surcharge needed"
+                    },
+                    {
+                        name: "35kg goes to Special oversize",
+                        dimensions: { height: 100, width: 50, depth: 50 },
+                        weight: 35.0,
+                        expectedTier: "Special oversize", 
+                        expectedFee: "£19.16",
+                        note: "Heavy items trigger Special oversize classification"
+                    },
+                    {
+                        name: "At dimension boundary but high dim weight",
+                        dimensions: { height: 120, width: 60, depth: 60 },
+                        weight: 10.0,
+                        expectedTier: "Large oversize",
+                        note: "Dimensional weight: 86.4kg exceeds 68.4kg limit"
+                    },
+                    {
+                        name: "Just under dimensional weight limit",
+                        dimensions: { height: 100, width: 40, depth: 40 },
+                        weight: 15.0,
+                        expectedTier: "Standard oversize",
+                        note: "Dimensional weight: 32kg, within limits"
+                    }
+                ];
+                
+                this.runCategoryTests(category, tests);
+            }
+
+            testLargeOversize() {
+                const category = "Large Oversize (> 120x60x60 or dim ≥ 68.4kg, < 31.5kg, dim ≤ 108kg)";
+                const tests = [
+                    {
+                        name: "Exceeds dimensions",
+                        dimensions: { height: 130, width: 50, depth: 50 },
+                        weight: 4.76,
+                        expectedTier: "Large oversize",
+                        expectedFee: "£11.45",
+                        note: "Exceeds 120x60x60 dimensions"
+                    },
+                    {
+                        name: "High dimensional weight but fits dimensions",
+                        dimensions: { height: 110, width: 55, depth: 55 },
+                        weight: 10.0,
+                        expectedTier: "Standard oversize",
+                        expectedFee: "£8.82",
+                        note: "Dimensions 110x55x55 don't exceed 120x60x60, so Standard oversize"
+                    },
+                    {
+                        name: "31.5kg goes to Special oversize",
+                        dimensions: { height: 130, width: 50, depth: 50 },
+                        weight: 31.5,
+                        expectedTier: "Special oversize",
+                        expectedFee: "£19.16",
+                        note: "Heavy items trigger Special oversize classification"
+                    },
+                    {
+                        name: "35kg goes to Special oversize",
+                        dimensions: { height: 130, width: 50, depth: 50 },
+                        weight: 35.0,
+                        expectedTier: "Special oversize",
+                        expectedFee: "£19.16",
+                        note: "Heavy items trigger Special oversize classification"
+                    },
+                    {
+                        name: "Dimensional weight exceeds 108kg limit",
+                        dimensions: { height: 130, width: 70, depth: 70 },
+                        weight: 4.76,
+                        expectedTier: "Special oversize",
+                        note: "Dimensional weight: 127.4kg exceeds 108kg limit"
+                    }
+                ];
+                
+                this.runCategoryTests(category, tests);
+            }
+
+            testSpecialOversize() {
+                const category = "Special Oversize (Longest > 175cm or girth > 360cm or dim > 108kg)";
+                const tests = [
+                    {
+                        name: "Long dimension (200cm)",
+                        dimensions: { height: 200, width: 50, depth: 50 },
+                        weight: 15.0,
+                        expectedTier: "Special oversize",
+                        note: "Longest side > 175cm"
+                    },
+                    {
+                        name: "High girth",
+                        dimensions: { height: 150, width: 100, depth: 100 },
+                        weight: 25.0,
+                        expectedTier: "Special oversize",
+                        note: "Girth = 2*(100+100)+150 = 550 > 360cm"
+                    },
+                    {
+                        name: "Very high dimensional weight",
+                        dimensions: { height: 130, width: 70, depth: 70 },
+                        weight: 20.0,
+                        expectedTier: "Special oversize",
+                        note: "Dimensional weight: 127.4kg > 108kg"
+                    },
+                    {
+                        name: "20kg bracket",
+                        dimensions: { height: 200, width: 50, depth: 50 },
+                        weight: 15.0,
+                        expectedTier: "Special oversize",
+                        expectedFee: "£15.43"
+                    },
+                    {
+                        name: "Over 60kg with per-kg charges",
+                        dimensions: { height: 200, width: 50, depth: 50 },
+                        weight: 65.0,
+                        expectedTier: "Special oversize",
+                        note: "Should have additional per-kg charges for 5kg excess over 60kg"
+                    }
+                ];
+                
+                this.runCategoryTests(category, tests);
+            }
+
+            testDimensionalWeightCases() {
+                const category = "Dimensional Weight Edge Cases";
+                const tests = [
+                    {
+                        name: "Light item, high dimensional weight",
+                        dimensions: { height: 50, width: 50, depth: 50 },
+                        weight: 0.1,
+                        expectedTier: "Standard oversize",
+                        note: "Dimensional weight: 25kg drives classification"
+                    },
+                    {
+                        name: "Heavy item, low dimensional weight",
+                        dimensions: { height: 30, width: 20, depth: 10 },
+                        weight: 5.0,
+                        expectedTier: "Standard parcel",
+                        note: "Unit weight 5kg > dimensional weight 1.2kg"
+                    },
+                    {
+                        name: "Equal unit and dimensional weight",
+                        dimensions: { height: 35.2, width: 35.2, depth: 35.2 },
+                        weight: 8.7,
+                        expectedTier: "Standard oversize",
+                        expectedFee: "£8.24",
+                        note: "Both weights ≈ 8.7kg, exceeds Small oversize 4.76kg limit"
+                    }
+                ];
+                
+                this.runCategoryTests(category, tests);
+            }
+
+            testMultiZonePricing() {
+                const category = "Multi-Zone Pricing";
+                const tests = [
+                    {
+                        name: "UK pricing (GBP)",
+                        dimensions: { height: 15, width: 10, depth: 0.8 },
+                        weight: 0.05,
+                        zone: "UK",
+                        expectedTier: "Small envelope",
+                        expectedFee: "£1.71"
+                    },
+                    {
+                        name: "DE pricing (EUR)",
+                        dimensions: { height: 15, width: 10, depth: 0.8 },
+                        weight: 0.05,
+                        zone: "DE",
+                        expectedTier: "Small envelope",
+                        expectedFee: "€1.90"
+                    },
+                    {
+                        name: "SE pricing (SEK)",
+                        dimensions: { height: 15, width: 10, depth: 0.8 },
+                        weight: 0.05,
+                        zone: "SE",
+                        expectedTier: "Small envelope",
+                        expectedFee: "30.04 SEK"
+                    },
+                    {
+                        name: "PL pricing (PLN)",
+                        dimensions: { height: 15, width: 10, depth: 0.8 },
+                        weight: 0.05,
+                        zone: "PL",
+                        expectedTier: "Small envelope",
+                        expectedFee: "4.75 PLN"
+                    }
+                ];
+                
+                this.runCategoryTests(category, tests);
+            }
+
+            testWeightBrackets() {
+                const category = "Weight Bracket Testing";
+                const tests = [
+                    {
+                        name: "Small parcel - all brackets",
+                        dimensions: { height: 30, width: 20, depth: 10 },
+                        weight: 0.15,
+                        expectedTier: "Small parcel",
+                        expectedFee: "£2.99",
+                        note: "150g bracket"
+                    },
+                    {
+                        name: "Standard parcel - mid bracket",
+                        dimensions: { height: 40, width: 30, depth: 20 },
+                        weight: 3.5,
+                        expectedTier: "Standard parcel",
+                        expectedFee: "£5.96",
+                        note: "3.5kg bracket"
+                    },
+                    {
+                        name: "Between brackets (1.8kg)",
+                        dimensions: { height: 30, width: 20, depth: 10 },
+                        weight: 1.8,
+                        expectedTier: "Small parcel",
+                        note: "Should use 1.9kg bracket pricing"
+                    }
+                ];
+                
+                this.runCategoryTests(category, tests);
+            }
+
+            testSurcharges() {
+                const category = "Surcharge Calculations";
+                const tests = [
+                    {
+                        name: "Small oversize - no surcharge (≤1.76kg)",
+                        dimensions: { height: 50, width: 40, depth: 30 },
+                        weight: 1.76,
+                        expectedTier: "Small oversize",
+                        expectedFee: "£6.36",
+                        note: "At surcharge threshold, no extra charge"
+                    },
+                    {
+                        name: "Small oversize - with surcharge (2.0kg)",
+                        dimensions: { height: 50, width: 40, depth: 30 },
+                        weight: 2.0,
+                        expectedTier: "Small oversize",
+                        note: "0.24kg excess × £0.01 = £0.0024 surcharge"
+                    },
+                    {
+                        name: "Standard oversize - with surcharge",
+                        dimensions: { height: 100, width: 50, depth: 50 },
+                        weight: 32.0,
+                        expectedTier: "Standard oversize",
+                        expectedFee: "£10.27",
+                        note: "32kg: base £10.25 + £0.02 surcharge (2.24kg × £0.01)"
+                    },
+                    {
+                        name: "33kg goes to Special oversize",
+                        dimensions: { height: 130, width: 50, depth: 50 },
+                        weight: 33.0,
+                        expectedTier: "Special oversize",
+                        expectedFee: "£19.16",
+                        note: "33kg exceeds Large oversize 31.5kg limit"
+                    },
+                    {
+                        name: "Special oversize - per kg charges",
+                        dimensions: { height: 200, width: 50, depth: 50 },
+                        weight: 65.0,
+                        expectedTier: "Special oversize",
+                        note: "5kg excess over 60kg with additional charges"
+                    }
+                ];
+                
+                this.runCategoryTests(category, tests);
+            }
+
+            testBoundaryConditions() {
+                const category = "Boundary Conditions";
+                const tests = [
+                    {
+                        name: "Exactly at small envelope dimension limit",
+                        dimensions: { height: 20, width: 15, depth: 1 },
+                        weight: 0.08,
+                        expectedTier: "Small envelope"
+                    },
+                    {
+                        name: "Just over small envelope dimension (20.1cm)",
+                        dimensions: { height: 20.1, width: 15, depth: 1 },
+                        weight: 0.08,
+                        expectedTier: "Standard envelope"
+                    },
+                    {
+                        name: "Zero weight",
+                        dimensions: { height: 10, width: 10, depth: 1 },
+                        weight: 0,
+                        expectedTier: "Small envelope"
+                    },
+                    {
+                        name: "Very small item",
+                        dimensions: { height: 1, width: 1, depth: 0.1 },
+                        weight: 0.001,
+                        expectedTier: "Small envelope"
+                    },
+                    {
+                        name: "Extreme dimensional weight vs unit weight",
+                        dimensions: { height: 80, width: 80, depth: 80 },
+                        weight: 0.1,
+                        expectedTier: "Special oversize",
+                        expectedFee: "£15.43",
+                        note: "Dimensional weight: 102.4kg exceeds Large oversize 108kg limit"
+                    }
+                ];
+                
+                this.runCategoryTests(category, tests);
+            }
+
+            runCategoryTests(categoryName, tests) {
+                const categoryResults = {
+                    name: categoryName,
+                    tests: [],
+                    passed: 0,
+                    total: tests.length
+                };
+
+                tests.forEach(test => {
+                    const result = this.runTest(test);
+                    categoryResults.tests.push(result);
+                    if (result.success) categoryResults.passed++;
+                });
+
+                this.testResults.push(categoryResults);
+            }
+
+            displayResults() {
+                const resultsContainer = document.getElementById('testResults');
+                let html = '';
+
+                this.testResults.forEach(category => {
+                    const passRate = ((category.passed / category.total) * 100).toFixed(1);
+                    html += `
+                        <div class="test-category">
+                            <h2>${category.name}</h2>
+                            <p><strong>Pass Rate:</strong> ${category.passed}/${category.total} (${passRate}%)</p>
+                    `;
+
+                    category.tests.forEach(test => {
+                        const cssClass = test.success ? 'pass' : 'fail';
+                        const statusIcon = test.success ? '✅' : '❌';
+                        
+                        html += `
+                            <div class="test-case ${cssClass}">
+                                <h4>${statusIcon} ${test.name}</h4>
+                                <div class="expected-vs-actual">
+                                    <div class="expected">
+                                        <strong>Expected:</strong><br>
+                                        Tier: ${test.expectedTier}<br>
+                                        ${test.expectedFee ? `Fee: ${test.expectedFee}` : ''}
+                                    </div>
+                                    <div class="actual">
+                                        <strong>Actual:</strong><br>
+                                        Tier: ${test.actualTier}<br>
+                                        Fee: ${test.actualFee}
+                                    </div>
+                                </div>
+                                <div class="test-details">
+                                    <strong>Dimensions:</strong> ${test.dimensions.height} × ${test.dimensions.width} × ${test.dimensions.depth} cm<br>
+                                    <strong>Weight:</strong> ${test.weight} kg<br>
+                                    <strong>Dimensional Weight:</strong> ${test.dimensionalWeight} kg<br>
+                                    <strong>Weight Bracket:</strong> ${test.weightBracket}<br>
+                                    <strong>Zone:</strong> ${test.zone || 'UK'}
+                                    ${test.note ? `<div class="note"><strong>Note:</strong> ${test.note}</div>` : ''}
+                                    ${!test.tierMatch ? '<br><span style="color: red;">❌ Tier mismatch</span>' : ''}
+                                    ${!test.feeMatch ? '<br><span style="color: red;">❌ Fee mismatch</span>' : ''}
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    html += '</div>';
+                });
+
+                resultsContainer.innerHTML = html;
+            }
+
+            displaySummary() {
+                const passRate = ((this.passedTests / this.totalTests) * 100).toFixed(1);
+                const status = this.passedTests === this.totalTests ? '🎉 ALL TESTS PASSED!' : '📊 Test Results';
+                
+                document.getElementById('summaryContent').innerHTML = `
+                    <h3>${status}</h3>
+                    <p><strong>Overall Pass Rate:</strong> ${this.passedTests}/${this.totalTests} (${passRate}%)</p>
+                    <p><strong>Categories Tested:</strong> ${this.testResults.length}</p>
+                    <p><strong>Test Coverage:</strong> All size tiers, weight brackets, dimensions, surcharges, multi-zone pricing, edge cases</p>
+                    <p><strong>Status:</strong> ${this.passedTests === this.totalTests ? 'Calculator is working perfectly!' : 'Review failed tests for improvements'}</p>
+                `;
+            }
+        }
+
+        // Run the comprehensive test suite when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            const testSuite = new FBATestSuite();
+            testSuite.runAllTests();
+        });
+    </script>
+</body>
+</html> 

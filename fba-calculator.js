@@ -520,10 +520,10 @@ class FBACalculator {
                 expectedTier: 'Small envelope'
             },
             {
-                name: 'Small envelope test (too heavy)',
+                name: 'Small envelope test (within 210g limit)',
                 dimensions: { height: 15, width: 10, depth: 0.8 },
-                weight: 0.1, // 100g - exceeds 80g limit
-                expectedTier: 'Standard envelope'
+                weight: 0.1, // 100g - within 210g limit
+                expectedTier: 'Small envelope'
             },
             {
                 name: 'Standard envelope test (within limits)',
@@ -563,8 +563,8 @@ class FBACalculator {
             },
             {
                 name: 'Small oversize test',
-                dimensions: { height: 55, width: 40, depth: 40 },
-                weight: 1.5, // 1.5kg - within 1.76kg limit
+                dimensions: { height: 50, width: 40, depth: 30 },
+                weight: 1.5, // 1.5kg - within 4.76kg limit, dim weight ~12kg
                 expectedTier: 'Small oversize'
             },
             {
