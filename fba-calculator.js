@@ -495,18 +495,25 @@ class FBACalculator {
         document.getElementById('dimensions').textContent = `${dimensions.height} x ${dimensions.width} x ${dimensions.depth} cm`;
         document.getElementById('fbaFee').textContent = fee;
         
-        // Add weight bracket info if it doesn't exist
-        let weightBracketElement = document.getElementById('weightBracket');
-        if (!weightBracketElement) {
-            const resultsSection = document.getElementById('results');
+        // Add weight bracket info if it doesn't exist (scoped to results section)
+        const resultsSection = document.getElementById('results');
+        let weightBracketElement = resultsSection ? resultsSection.querySelector('#weightBracket') : null;
+        if (!weightBracketElement && resultsSection) {
             const newResultItem = document.createElement('div');
             newResultItem.className = 'result-item';
             newResultItem.innerHTML = '<strong>Weight Bracket:</strong> <span id="weightBracket"></span>';
-            resultsSection.insertBefore(newResultItem, document.querySelector('.result-item:last-child'));
-            weightBracketElement = document.getElementById('weightBracket');
+            const lastResultItem = resultsSection.querySelector('.result-item:last-child');
+            if (lastResultItem) {
+                resultsSection.insertBefore(newResultItem, lastResultItem.nextSibling);
+            } else {
+                resultsSection.appendChild(newResultItem);
+            }
+            weightBracketElement = resultsSection.querySelector('#weightBracket');
         }
         
-        weightBracketElement.textContent = weightBracket.description;
+        if (weightBracketElement) {
+            weightBracketElement.textContent = weightBracket.description;
+        }
         
         document.getElementById('results').style.display = 'block';
     }
