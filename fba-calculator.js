@@ -583,8 +583,8 @@ class FBACalculator {
             {
                 name: 'Large oversize test',
                 dimensions: { height: 130, width: 70, depth: 70 },
-                weight: 25.0, // 25kg - within 31.5kg limit
-                expectedTier: 'Large oversize'
+                weight: 25.0, // 25kg unit; dimensional weight 127.4kg > 108kg → Special oversize
+                expectedTier: 'Special oversize'
             },
             {
                 name: 'Special oversize test (large dimensions)',
