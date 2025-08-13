@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FBA Calculator - Business Requirements Stress Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-category {
+            margin: 30px 0;
+            padding: 20px;
+            border: 2px solid #333;
+            border-radius: 8px;
+        }
+        .test-case {
+            margin: 10px 0;
+            padding: 12px;
+            border-radius: 5px;
+            border-left: 5px solid #ddd;
+            font-size: 0.9em;
+        }
+        .pass {
+            background-color: #e8f5e8;
+            border-left-color: #4caf50;
+        }
+        .fail {
+            background-color: #ffeaea;
+            border-left-color: #f44336;
+        }
+        .warning {
+            background-color: #fff8e1;
+            border-left-color: #ff9800;
+        }
+        .error {
+            background-color: #ffebee;
+            border-left-color: #e91e63;
+        }
+        .summary {
+            background-color: #f0f0f0;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .test-details {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 5px;
+        }
+        .progress {
+            background-color: #e0e0e0;
+            border-radius: 4px;
+            height: 20px;
+            margin: 10px 0;
+        }
+        .progress-bar {
+            background-color: #4caf50;
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        .controls {
+            margin: 20px 0;
+            text-align: center;
+        }
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0 5px;
+            font-weight: 600;
+        }
+        .btn:hover {
+            background: #0056b3;
+        }
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+    <script src="fba-calculator.js?v=20250812-fix2"></script>
+</head>
+<body>
+    <h1>🏢 FBA Calculator - Business Requirements Stress Test</h1>
+    <p>This test validates the calculator against actual Amazon FBA business requirements and proven logic.</p>
+    
+    <div class="controls">
+        <button id="runBusinessTest" class="btn">Run Business Stress Test</button>
+        <button id="runQuickTest" class="btn">Run Quick Validation</button>
+        <button id="stopTest" class="btn" disabled>Stop Test</button>
+    </div>
+
+    <div id="progress" class="progress" style="display: none;">
+        <div id="progressBar" class="progress-bar" style="width: 0%"></div>
+    </div>
+    <div id="progressText" style="text-align: center; margin: 10px 0; display: none;"></div>
+
+    <div id="summary" class="summary">
+        <h2>Test Summary</h2>
+        <div id="summaryContent">Click "Run Business Stress Test" to validate against real FBA requirements...</div>
+    </div>
+    
+    <div id="testResults"></div>
+    
+    <script>
+        class BusinessStressTest {
+            constructor() {
+                this.calculator = new FBACalculator();
+                this.totalTests = 0;
+                this.passedTests = 0;
+                this.failedTests = 0;
+                this.errorTests = 0;
+                this.warningTests = 0;
+                this.testResults = [];
+                this.isRunning = false;
+                this.shouldStop = false;
+                
+                this.initializeEventListeners();
+            }
+
+            initializeEventListeners() {
+                document.getElementById('runBusinessTest').addEventListener('click', () => this.runBusinessStressTest());
+                document.getElementById('runQuickTest').addEventListener('click', () => this.runQuickTest());
+                document.getElementById('stopTest').addEventListener('click', () => this.stopTest());
+            }
+
+            updateProgress(current, total, category = '') {
+                const percentage = (current / total) * 100;
+                document.getElementById('progressBar').style.width = `${percentage}%`;
+                document.getElementById('progressText').textContent = 
+                    `${category} - Test ${current}/${total} (${percentage.toFixed(1)}%)`;
+            }
+
+            showProgress() {
+                document.getElementById('progress').style.display = 'block';
+                document.getElementById('progressText').style.display = 'block';
+                document.getElementById('runBusinessTest').disabled = true;
+                document.getElementById('runQuickTest').disabled = true;
+                document.getElementById('stopTest').disabled = false;
+                this.isRunning = true;
+                this.shouldStop = false;
+            }
+
+            hideProgress() {
+                document.getElementById('progress').style.display = 'none';
+                document.getElementById('progressText').style.display = 'none';
+                document.getElementById('runBusinessTest').disabled = false;
+                document.getElementById('runQuickTest').disabled = false;
+                document.getElementById('stopTest').disabled = true;
+                this.isRunning = false;
+            }
+
+            stopTest() {
+                this.shouldStop = true;
+                this.hideProgress();
+            }
+
+            async runBusinessStressTest() {
+                this.resetResults();
+                this.showProgress();
+                
+                try {
+                    // Test based on actual Amazon FBA requirements
+                    await this.testEnvelopeTiers();
+                    if (this.shouldStop) return;
+
+                    await this.testParcelTiers();
+                    if (this.shouldStop) return;
+
+                    await this.testOversizeTiers();
+                    if (this.shouldStop) return;
+
+                    await this.testDimensionalWeightLogic();
+                    if (this.shouldStop) return;
+
+                    await this.testWeightBrackets();
+                    if (this.shouldStop) return;
+
+                    await this.testSurchargeLogic();
+                    if (this.shouldStop) return;
+
+                    await this.testMultiZoneSupport();
+                    if (this.shouldStop) return;
+
+                    await this.testBoundaryConditions();
+                    if (this.shouldStop) return;
+
+                    await this.testRealWorldScenarios();
+                    if (this.shouldStop) return;
+
+                    await this.testPerformanceStability();
+                    if (this.shouldStop) return;
+
+                } catch (error) {
+                    this.addErrorResult('Critical Business Test Failure', error.message, {}, 0);
+                } finally {
+                    this.hideProgress();
+                    this.displayResults();
+                    this.displaySummary();
+                }
+            }
+
+            async runQuickTest() {
+                this.resetResults();
+                this.showProgress();
+                
+                try {
+                    await this.testEnvelopeTiers(true);
+                    if (this.shouldStop) return;
+                    
+                    await this.testParcelTiers(true);
+                    if (this.shouldStop) return;
+                    
+                    await this.testOversizeTiers(true);
+                    if (this.shouldStop) return;
+                    
+                } catch (error) {
+                    this.addErrorResult('Quick Business Test Failure', error.message, {}, 0);
+                } finally {
+                    this.hideProgress();
+                    this.displayResults();
+                    this.displaySummary();
+                }
+            }
+
+            resetResults() {
+                this.totalTests = 0;
+                this.passedTests = 0;
+                this.failedTests = 0;
+                this.errorTests = 0;
+                this.warningTests = 0;
+                this.testResults = [];
+            }
+
+            // Test envelope tiers based on actual FBA requirements
+            async testEnvelopeTiers(quickMode = false) {
+                const category = "Envelope Tiers (Based on FBA Requirements)";
+                const tests = [
+                    // Small envelope: ≤ 20x15x1 cm, ≤ 210g
+                    { name: "Small envelope - minimum", dims: [5, 5, 0.3], weight: 0.01, expected: "Small envelope" },
+                    { name: "Small envelope - 80g bracket", dims: [15, 10, 0.8], weight: 0.05, expected: "Small envelope" },
+                    { name: "Small envelope - 210g bracket", dims: [15, 10, 0.8], weight: 0.1, expected: "Small envelope" },
+                    { name: "Small envelope - at dimension limit", dims: [20, 15, 1], weight: 0.08, expected: "Small envelope" },
+                    { name: "Small envelope - at weight limit", dims: [15, 10, 0.8], weight: 0.21, expected: "Small envelope" },
+                    
+                    // Standard envelope: ≤ 35x25x2.5 cm, ≤ 460g  
+                    { name: "Standard envelope - typical", dims: [30, 20, 2], weight: 0.2, expected: "Standard envelope" },
+                    { name: "Standard envelope - at limit", dims: [35, 25, 2.5], weight: 0.46, expected: "Standard envelope" },
+                    
+                    // Large envelope: ≤ 35x25x4 cm, ≤ 960g
+                    { name: "Large envelope - typical", dims: [32, 22, 3.5], weight: 0.5, expected: "Large envelope" },
+                    { name: "Large envelope - at limit", dims: [35, 25, 4], weight: 0.96, expected: "Large envelope" },
+                    
+                    // Extra-large envelope: ≤ 35x25x6 cm, ≤ 960g
+                    { name: "Extra-large envelope - typical", dims: [32, 22, 5], weight: 0.8, expected: "Extra-large envelope" },
+                    { name: "Extra-large envelope - at limit", dims: [35, 25, 6], weight: 0.96, expected: "Extra-large envelope" },
+                ];
+
+                const testSet = quickMode ? tests.slice(0, 6) : tests;
+                await this.runCategoryTests(category, testSet);
+            }
+
+            // Test parcel tiers based on actual FBA requirements
+            async testParcelTiers(quickMode = false) {
+                const category = "Parcel Tiers (Based on FBA Requirements)";
+                const tests = [
+                    // Small parcel: ≤ 35x25x12 cm, ≤ 3.9kg unit or dimensional
+                    { name: "Small parcel - 150g bracket", dims: [30, 20, 10], weight: 0.15, expected: "Small parcel" },
+                    { name: "Small parcel - 400g bracket", dims: [30, 20, 10], weight: 0.4, expected: "Small parcel" },
+                    { name: "Small parcel - 1.4kg bracket", dims: [30, 20, 10], weight: 1.4, expected: "Small parcel" },
+                    { name: "Small parcel - at weight limit", dims: [35, 25, 12], weight: 3.9, expected: "Small parcel" },
+                    { name: "Small parcel - dimensional weight limit", dims: [35, 25, 12], weight: 2.0, expected: "Small parcel" }, // Dim weight = 2.1kg
+                    
+                    // Standard parcel: ≤ 45x34x26 cm, ≤ 11.9kg unit or dimensional
+                    { name: "Standard parcel - typical", dims: [40, 30, 20], weight: 5.0, expected: "Standard parcel" },
+                    { name: "Standard parcel - at weight limit", dims: [45, 34, 26], weight: 11.9, expected: "Standard parcel" },
+                    { name: "Standard parcel - dimensional weight", dims: [45, 34, 26], weight: 8.0, expected: "Standard parcel" }, // Dim weight = 7.956kg
+                ];
+
+                const testSet = quickMode ? tests.slice(0, 5) : tests;
+                await this.runCategoryTests(category, testSet);
+            }
+
+            // Test oversize tiers based on actual FBA requirements
+            async testOversizeTiers(quickMode = false) {
+                const category = "Oversize Tiers (Based on FBA Requirements)";
+                const tests = [
+                    // Small oversize: ≤ 61x46x46 cm, ≤ 4.76kg unit, ≤ 25.82kg dimensional
+                    { name: "Small oversize - no surcharge", dims: [50, 40, 30], weight: 1.5, expected: "Small oversize" },
+                    { name: "Small oversize - with surcharge", dims: [50, 40, 30], weight: 2.5, expected: "Small oversize" },
+                    { name: "Small oversize - at unit weight limit", dims: [50, 40, 30], weight: 4.76, expected: "Small oversize" },
+                    
+                    // Standard oversize: ≤ 120x60x60 cm, < 32.9kg unit, < 68.4kg dimensional
+                    { name: "Standard oversize - typical", dims: [100, 50, 50], weight: 15.0, expected: "Standard oversize" },
+                    { name: "Standard oversize - high dimensional weight", dims: [120, 60, 60], weight: 10.0, expected: "Large oversize" }, // Dim weight = 86.4kg > 68.4kg
+                    
+                    // Large oversize: Exceeds Standard oversize limits but ≤ 31.5kg unit, < 108kg dimensional
+                    { name: "Large oversize - exceeds dimensions", dims: [130, 50, 50], weight: 25.0, expected: "Large oversize" },
+                    { name: "Large oversize - at weight limit", dims: [130, 50, 50], weight: 31.5, expected: "Special oversize" }, // 31.5kg is the limit, goes to Special oversize
+                    
+                    // Special oversize: Longest > 175cm or girth > 360cm or exceeds other limits
+                    { name: "Special oversize - long dimension", dims: [200, 50, 50], weight: 20.0, expected: "Special oversize" },
+                    { name: "Special oversize - high girth", dims: [120, 90, 90], weight: 20.0, expected: "Special oversize" }, // Girth = 480cm > 360cm
+                    { name: "Special oversize - very heavy", dims: [100, 50, 50], weight: 50.0, expected: "Special oversize" },
+                ];
+
+                const testSet = quickMode ? tests.slice(0, 6) : tests;
+                await this.runCategoryTests(category, testSet);
+            }
+
+            // Test dimensional weight logic
+            async testDimensionalWeightLogic(quickMode = false) {
+                const category = "Dimensional Weight Logic";
+                const tests = [
+                    // Cases where dimensional weight should drive classification
+                    { name: "Light but bulky item", dims: [60, 60, 60], weight: 1.0, expected: "Standard oversize" }, // Dim weight = 43.2kg
+                    { name: "Dimensional weight pushes tier", dims: [40, 30, 25], weight: 5.0, expected: "Standard parcel" }, // Dim weight = 6kg vs unit 5kg
+                    { name: "Heavy compact item", dims: [20, 20, 20], weight: 15.0, expected: "Standard oversize" }, // Unit weight drives
+                    { name: "Balanced weights", dims: [35.2, 35.2, 35.2], weight: 8.7, expected: "Standard oversize" }, // Both ~8.7kg
+                ];
+
+                const testSet = quickMode ? tests.slice(0, 3) : tests;
+                await this.runCategoryTests(category, testSet);
+            }
+
+            // Test weight brackets within tiers
+            async testWeightBrackets(quickMode = false) {
+                const category = "Weight Bracket Accuracy";
+                const tests = [
+                    // Test exact bracket boundaries
+                    { name: "Small envelope 80g bracket", dims: [15, 10, 0.8], weight: 0.08, expected: "Small envelope" },
+                    { name: "Small envelope 210g bracket", dims: [15, 10, 0.8], weight: 0.21, expected: "Small envelope" },
+                    { name: "Standard envelope 60g bracket", dims: [30, 20, 2], weight: 0.06, expected: "Standard envelope" },
+                    { name: "Standard envelope 210g bracket", dims: [30, 20, 2], weight: 0.21, expected: "Standard envelope" },
+                    { name: "Standard envelope 460g bracket", dims: [30, 20, 2], weight: 0.46, expected: "Standard envelope" },
+                    { name: "Small parcel 150g bracket", dims: [30, 20, 10], weight: 0.15, expected: "Small parcel" },
+                    { name: "Small parcel 3.9kg bracket", dims: [30, 20, 10], weight: 3.9, expected: "Small parcel" },
+                ];
+
+                const testSet = quickMode ? tests.slice(0, 4) : tests;
+                await this.runCategoryTests(category, testSet);
+            }
+
+            // Test surcharge calculations
+            async testSurchargeLogic(quickMode = false) {
+                const category = "Surcharge Logic";
+                const tests = [
+                    // Small oversize surcharges (>1.76kg)
+                    { name: "Small oversize no surcharge", dims: [50, 40, 30], weight: 1.76, expected: "Small oversize" },
+                    { name: "Small oversize with surcharge", dims: [50, 40, 30], weight: 2.0, expected: "Small oversize" },
+                    
+                    // Standard oversize surcharges (>29.76kg) 
+                    { name: "Standard oversize no surcharge", dims: [100, 50, 50], weight: 29.76, expected: "Standard oversize" },
+                    { name: "Standard oversize with surcharge", dims: [100, 50, 50], weight: 32.0, expected: "Standard oversize" },
+                    
+                    // Special oversize additional charges (>60kg)
+                    { name: "Special oversize under 60kg", dims: [200, 50, 50], weight: 50.0, expected: "Special oversize" },
+                    { name: "Special oversize over 60kg", dims: [200, 50, 50], weight: 70.0, expected: "Special oversize" },
+                ];
+
+                const testSet = quickMode ? tests.slice(0, 4) : tests;
+                await this.runCategoryTests(category, testSet);
+            }
+
+            // Test multi-zone support
+            async testMultiZoneSupport(quickMode = false) {
+                const category = "Multi-Zone Support";
+                const baseTest = { dims: [15, 10, 0.8], weight: 0.05, expected: "Small envelope" };
+                const zones = quickMode ? ['UK', 'DE', 'SE'] : ['UK', 'DE', 'FR', 'IT', 'ES', 'NL', 'SE', 'PL', 'BE'];
+                
+                const tests = zones.map(zone => ({
+                    name: `Zone ${zone} classification`,
+                    ...baseTest,
+                    zone: zone
+                }));
+
+                await this.runCategoryTests(category, tests);
+            }
+
+            // Test boundary conditions that matter for business
+            async testBoundaryConditions(quickMode = false) {
+                const category = "Business-Critical Boundaries";
+                const tests = [
+                    // Critical tier transitions
+                    { name: "Small to Standard envelope transition", dims: [20.1, 15, 1], weight: 0.08, expected: "Standard envelope" },
+                    { name: "Standard to Large envelope transition", dims: [35, 25, 2.6], weight: 0.46, expected: "Large envelope" },
+                    { name: "Large to Extra-large envelope transition", dims: [35, 25, 4.1], weight: 0.96, expected: "Extra-large envelope" },
+                    { name: "Parcel to oversize transition", dims: [45.1, 34, 26], weight: 11.9, expected: "Standard oversize" }, // Exceeds parcel dims, weight >11.9kg
+                    
+                    // Weight-driven transitions
+                    { name: "Small parcel weight limit", dims: [30, 20, 10], weight: 3.91, expected: "Standard parcel" },
+                    { name: "Standard parcel weight limit", dims: [40, 30, 20], weight: 11.91, expected: "Standard oversize" }, // Exceeds 11.9kg weight limit
+                    
+                    // Special oversize triggers
+                    { name: "Length triggers Special oversize", dims: [175.1, 50, 50], weight: 20.0, expected: "Special oversize" },
+                    { name: "Girth triggers Special oversize", dims: [120, 90, 90], weight: 20.0, expected: "Special oversize" },
+                ];
+
+                const testSet = quickMode ? tests.slice(0, 5) : tests;
+                await this.runCategoryTests(category, testSet);
+            }
+
+            // Test real-world scenarios
+            async testRealWorldScenarios(quickMode = false) {
+                const category = "Real-World Product Scenarios";
+                const tests = [
+                    // Common product types
+                    { name: "Book", dims: [24, 16, 2], weight: 0.5, expected: "Large envelope" },
+                    { name: "DVD", dims: [19, 14, 1.5], weight: 0.1, expected: "Standard envelope" }, // 1.5cm depth exceeds Small envelope 1cm limit
+                    { name: "Phone case", dims: [20, 12, 2], weight: 0.15, expected: "Standard envelope" },
+                    { name: "Laptop", dims: [35, 25, 3], weight: 2.5, expected: "Small parcel" },
+                    { name: "Monitor", dims: [70, 50, 20], weight: 8.0, expected: "Standard oversize" },
+                    { name: "Mattress", dims: [200, 150, 30], weight: 25.0, expected: "Special oversize" },
+                    { name: "Heavy tool", dims: [30, 20, 15], weight: 15.0, expected: "Standard oversize" },
+                    { name: "Large art print", dims: [100, 70, 5], weight: 2.0, expected: "Large oversize" }, // Exceeds 120x60x60 dimensions
+                    { name: "Pillow (light but bulky)", dims: [60, 40, 20], weight: 1.0, expected: "Small oversize" },
+                    { name: "Exercise equipment", dims: [120, 50, 40], weight: 30.0, expected: "Standard oversize" }, // Fits 120x60x60, weight <33kg, dim weight <68.4kg
+                ];
+
+                const testSet = quickMode ? tests.slice(0, 5) : tests;
+                await this.runCategoryTests(category, testSet);
+            }
+
+            // Test performance and stability
+            async testPerformanceStability(quickMode = false) {
+                const category = "Performance & Stability";
+                const tests = [];
+                
+                const scenarios = quickMode ? 25 : 100;
+                
+                // Generate realistic test cases
+                const productTypes = [
+                    { name: "Small electronics", dimRange: [5, 30], weightRange: [0.1, 2] },
+                    { name: "Books/media", dimRange: [15, 35], weightRange: [0.2, 1.5] },
+                    { name: "Clothing", dimRange: [20, 50], weightRange: [0.3, 3] },
+                    { name: "Home goods", dimRange: [30, 80], weightRange: [2, 15] },
+                    { name: "Large items", dimRange: [50, 150], weightRange: [10, 40] }
+                ];
+
+                for (let i = 0; i < scenarios; i++) {
+                    const type = productTypes[i % productTypes.length];
+                    const dims = [
+                        this.randomInRange(type.dimRange[0], type.dimRange[1]),
+                        this.randomInRange(type.dimRange[0], type.dimRange[1]),
+                        this.randomInRange(type.dimRange[0] * 0.3, type.dimRange[1] * 0.8)
+                    ];
+                    const weight = this.randomInRange(type.weightRange[0], type.weightRange[1]);
+                    
+                    tests.push({
+                        name: `${type.name} variant ${i + 1}`,
+                        dims: dims,
+                        weight: weight,
+                        expected: null, // We'll accept whatever the calculator returns
+                        isPerformanceTest: true
+                    });
+                }
+
+                await this.runCategoryTests(category, tests);
+            }
+
+            randomInRange(min, max) {
+                return Math.round((Math.random() * (max - min) + min) * 100) / 100;
+            }
+
+            async runCategoryTests(categoryName, tests, allowErrors = false) {
+                if (this.shouldStop) return;
+
+                const categoryResults = {
+                    name: categoryName,
+                    tests: [],
+                    passed: 0,
+                    failed: 0,
+                    errors: 0,
+                    warnings: 0,
+                    total: tests.length
+                };
+
+                for (let i = 0; i < tests.length; i++) {
+                    if (this.shouldStop) break;
+                    
+                    this.updateProgress(i + 1, tests.length, categoryName);
+                    
+                    const test = tests[i];
+                    const result = await this.runSingleTest(test, allowErrors);
+                    categoryResults.tests.push(result);
+                    
+                    if (result.status === 'pass') categoryResults.passed++;
+                    else if (result.status === 'fail') categoryResults.failed++;
+                    else if (result.status === 'error') categoryResults.errors++;
+                    else if (result.status === 'warning') categoryResults.warnings++;
+                    
+                    // Small delay to prevent UI blocking
+                    await new Promise(resolve => setTimeout(resolve, 1));
+                }
+
+                this.testResults.push(categoryResults);
+            }
+
+            async runSingleTest(test, allowErrors = false) {
+                this.totalTests++;
+                
+                try {
+                    const { dims, weight, expected, zone = 'UK', expectError = false, isPerformanceTest = false } = test;
+                    const dimensions = { height: dims[0], width: dims[1], depth: dims[2] };
+                    
+                    // Validate inputs
+                    if (dims.some(d => d <= 0) || weight < 0) {
+                        if (expectError || allowErrors) {
+                            this.warningTests++;
+                            return {
+                                ...test,
+                                actualTier: 'Invalid Input',
+                                actualFee: 'N/A',
+                                status: 'warning',
+                                message: 'Invalid input handled as expected'
+                            };
+                        } else {
+                            this.errorTests++;
+                            return {
+                                ...test,
+                                actualTier: 'Error',
+                                actualFee: 'N/A',
+                                status: 'error',
+                                message: 'Invalid input: negative or zero dimensions/weight'
+                            };
+                        }
+                    }
+
+                    const sortedDims = dims.sort((a, b) => b - a);
+                    const dimensionalWeight = this.calculator.calculateDimensionalWeight(sortedDims[0], sortedDims[1], sortedDims[2]);
+                    
+                    const tier = this.calculator.determineSizeTier(dimensions, weight, dimensionalWeight);
+                    const weightBracket = this.calculator.findWeightBracket(tier, weight);
+                    const fee = this.calculator.calculateFee(tier, weight, zone, weightBracket);
+                    
+                    let status = 'pass';
+                    let message = '';
+                    
+                    if (isPerformanceTest) {
+                        // Performance tests just verify no crashes
+                        status = 'pass';
+                        message = 'Performance test completed successfully';
+                        this.passedTests++;
+                    } else if (expected && tier.name !== expected) {
+                        status = 'fail';
+                        message = `Expected ${expected}, got ${tier.name}`;
+                        this.failedTests++;
+                    } else if (!expected) {
+                        // No expectation set - just verify it doesn't crash
+                        status = 'pass';
+                        message = 'No expectation set - verified stability';
+                        this.passedTests++;
+                    } else {
+                        this.passedTests++;
+                    }
+                    
+                    return {
+                        ...test,
+                        actualTier: tier.name,
+                        actualFee: fee,
+                        dimensionalWeight: dimensionalWeight.toFixed(3),
+                        weightBracket: weightBracket.description,
+                        status: status,
+                        message: message
+                    };
+                    
+                } catch (error) {
+                    this.errorTests++;
+                    return {
+                        ...test,
+                        actualTier: 'Error',
+                        actualFee: 'N/A',
+                        status: 'error',
+                        message: error.message
+                    };
+                }
+            }
+
+            addErrorResult(name, message, dims, weight) {
+                this.totalTests++;
+                this.errorTests++;
+                this.testResults.push({
+                    name: 'Critical Errors',
+                    tests: [{
+                        name: name,
+                        dims: dims,
+                        weight: weight,
+                        actualTier: 'Critical Error',
+                        actualFee: 'N/A',
+                        status: 'error',
+                        message: message
+                    }],
+                    passed: 0,
+                    failed: 0,
+                    errors: 1,
+                    warnings: 0,
+                    total: 1
+                });
+            }
+
+            displayResults() {
+                const resultsContainer = document.getElementById('testResults');
+                let html = '';
+
+                this.testResults.forEach(category => {
+                    const passRate = category.total > 0 ? ((category.passed / category.total) * 100).toFixed(1) : '0.0';
+                    html += `
+                        <div class="test-category">
+                            <h2>${category.name}</h2>
+                            <p><strong>Results:</strong> ${category.passed} passed, ${category.failed} failed, ${category.errors} errors, ${category.warnings} warnings (${passRate}% pass rate)</p>
+                    `;
+
+                    category.tests.forEach(test => {
+                        const cssClass = test.status;
+                        const statusIcon = {
+                            'pass': '✅',
+                            'fail': '❌', 
+                            'error': '🚨',
+                            'warning': '⚠️'
+                        }[test.status] || '❓';
+                        
+                        html += `
+                            <div class="test-case ${cssClass}">
+                                <strong>${statusIcon} ${test.name}</strong>
+                                ${test.message ? `<div style="color: #666; font-style: italic;">${test.message}</div>` : ''}
+                                <div class="test-details">
+                                    <strong>Dimensions:</strong> ${test.dims ? test.dims.join(' × ') : 'N/A'} cm |
+                                    <strong>Weight:</strong> ${test.weight || 'N/A'} kg |
+                                    <strong>Expected:</strong> ${test.expected || 'N/A'} |
+                                    <strong>Actual:</strong> ${test.actualTier || 'N/A'}
+                                    ${test.dimensionalWeight ? ` | <strong>Dim Weight:</strong> ${test.dimensionalWeight} kg` : ''}
+                                    ${test.actualFee && test.actualFee !== 'N/A' ? ` | <strong>Fee:</strong> ${test.actualFee}` : ''}
+                                    ${test.zone && test.zone !== 'UK' ? ` | <strong>Zone:</strong> ${test.zone}` : ''}
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    html += '</div>';
+                });
+
+                resultsContainer.innerHTML = html;
+            }
+
+            displaySummary() {
+                const passRate = this.totalTests > 0 ? ((this.passedTests / this.totalTests) * 100).toFixed(1) : '0.0';
+                const status = this.errorTests > 0 ? '🚨 CRITICAL ISSUES FOUND' : 
+                              this.failedTests > 0 ? '⚠️ SOME TESTS FAILED' : 
+                              '🎉 ALL BUSINESS REQUIREMENTS VALIDATED';
+                
+                document.getElementById('summaryContent').innerHTML = `
+                    <h3>${status}</h3>
+                    <p><strong>Total Tests:</strong> ${this.totalTests}</p>
+                    <p><strong>Results:</strong> ${this.passedTests} passed, ${this.failedTests} failed, ${this.errorTests} errors, ${this.warningTests} warnings</p>
+                    <p><strong>Pass Rate:</strong> ${passRate}%</p>
+                    <p><strong>Categories Tested:</strong> ${this.testResults.length}</p>
+                    <p><strong>Business Coverage:</strong> All FBA tiers, weight brackets, dimensional weight logic, surcharges, multi-zone support, real-world scenarios, performance stability</p>
+                    <p><strong>Validation:</strong> ${this.passedTests === this.totalTests ? 'Calculator meets all business requirements!' : 'Review failed tests for business rule violations'}</p>
+                `;
+            }
+        }
+
+        // Initialize the business stress test when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new BusinessStressTest();
+        });
+    </script>
+</body>
+</html>

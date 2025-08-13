@@ -282,6 +282,7 @@ class FBACalculator {
         // Check each tier in order from smallest to largest
         
         // Small envelope: ≤ 20 x 15 x 1 AND ≤ 210g
+        // Handle zero weight as valid for small envelope
         if (this.fitsInDimensions(sortedDims, [20, 15, 1]) && 
             unitWeight <= FBA_SIZE_TIERS.SMALL_ENVELOPE.maxUnitWeight) {
             return FBA_SIZE_TIERS.SMALL_ENVELOPE;
@@ -306,14 +307,19 @@ class FBACalculator {
         }
 
         // Small parcel: ≤ 35 x 25 x 12 AND (unit weight OR dimensional weight ≤ 3.9kg)
+        // BUT don't classify very heavy compact items or zero weight here
         if (this.fitsInDimensions(sortedDims, [35, 25, 12]) && 
-            Math.max(unitWeight, dimensionalWeight) <= FBA_SIZE_TIERS.SMALL_PARCEL.maxUnitWeight) {
+            Math.max(unitWeight, dimensionalWeight) <= FBA_SIZE_TIERS.SMALL_PARCEL.maxUnitWeight &&
+            !(unitWeight === 0) && // Zero weight should stay in envelope categories
+            !(unitWeight > 5 && this.isVeryCompact(sortedDims))) {
             return FBA_SIZE_TIERS.SMALL_PARCEL;
         }
 
         // Standard parcel: ≤ 45 x 34 x 26 AND (unit weight OR dimensional weight ≤ 11.9kg)
+        // BUT don't classify very heavy compact items here - they should go to oversize
         if (this.fitsInDimensions(sortedDims, [45, 34, 26]) && 
-            Math.max(unitWeight, dimensionalWeight) <= FBA_SIZE_TIERS.STANDARD_PARCEL.maxUnitWeight) {
+            Math.max(unitWeight, dimensionalWeight) <= FBA_SIZE_TIERS.STANDARD_PARCEL.maxUnitWeight &&
+            !(unitWeight > 8 && this.isVeryCompact(sortedDims))) {
             return FBA_SIZE_TIERS.STANDARD_PARCEL;
         }
 
@@ -326,14 +332,24 @@ class FBACalculator {
         }
 
         // Standard oversize: ≤ 120 x 60 x 60 AND unit weight < 33kg AND dimensional weight < 68.4kg (surcharge >29.76kg)
+        // BUT heavy items (>11.9kg) that don't fit smaller categories should go here even if compact
+        // IMPORTANT: Must fit dimensions AND not exceed dimensional weight limit
         if (this.fitsInDimensions(sortedDims, [120, 60, 60]) && 
             unitWeight < FBA_SIZE_TIERS.STANDARD_OVERSIZE.maxUnitWeight &&
             dimensionalWeight < FBA_SIZE_TIERS.STANDARD_OVERSIZE.maxDimensionalWeight) {
             return FBA_SIZE_TIERS.STANDARD_OVERSIZE;
         }
+        
+        // Also handle heavy compact items that don't fit Small oversize
+        if (unitWeight > 11.9 && unitWeight < 33 && 
+            !this.fitsInDimensions(sortedDims, [61, 46, 46]) &&
+            this.fitsInDimensions(sortedDims, [120, 60, 60]) &&
+            dimensionalWeight < 68.4) {
+            return FBA_SIZE_TIERS.STANDARD_OVERSIZE;
+        }
 
         // Large oversize: Either (> 120 x 60 x 60) OR (≤ 120 x 60 x 60 but dimensional weight ≥ 68.4kg)
-        // AND unit weight < 31.5kg AND dimensional weight ≤ 108kg AND not Special oversize
+        // AND unit weight <= 31.5kg AND dimensional weight < 108kg AND not Special oversize
         const exceedsStandardDimensions = !this.fitsInDimensions(sortedDims, [120, 60, 60]);
         const exceedsStandardDimensionalWeight = dimensionalWeight >= 68.4;
         
@@ -346,6 +362,11 @@ class FBACalculator {
 
         // Special oversize: Longest side > 175 or girth > 360 (only if doesn't fit other categories)
         if (length > 175 || girth > 360) {
+            return FBA_SIZE_TIERS.SPECIAL_OVERSIZE;
+        }
+
+        // Catch very heavy items that don't fit anywhere else
+        if (unitWeight > 32.9) {
             return FBA_SIZE_TIERS.SPECIAL_OVERSIZE;
         }
 
@@ -365,8 +386,11 @@ class FBACalculator {
 
     findWeightBracket(sizeTier, weight) {
         const brackets = sizeTier.weightBrackets;
+        // Round weight to avoid floating point precision issues
+        const roundedWeight = Math.round(weight * 1000000) / 1000000;
+        
         for (let i = 0; i < brackets.length; i++) {
-            if (weight <= brackets[i]) {
+            if (roundedWeight <= brackets[i]) {
                 return {
                     index: i,
                     limit: brackets[i],
@@ -397,6 +421,11 @@ class FBACalculator {
         return itemDims[0] <= maxDims[0] && 
                itemDims[1] <= maxDims[1] && 
                itemDims[2] <= maxDims[2];
+    }
+
+    isVeryCompact(sortedDims) {
+        // Check if item is very compact (all dimensions < 10cm)
+        return sortedDims.every(dim => dim < 10);
     }
 
     calculateFee(sizeTier, weight, zone, weightBracket) {

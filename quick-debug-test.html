@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Debug Test</title>
+    <script src="fba-calculator.js?v=20250812"></script>
+</head>
+<body>
+    <h1>Quick Debug Test</h1>
+    <div id="results"></div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const calculator = new FBACalculator();
+            
+            const debugCases = [
+                { name: "Zero weight", dims: [10, 10, 10], weight: 0 },
+                { name: "Very small but heavy", dims: [1, 1, 1], weight: 10 },
+                { name: "Very thin sheet", dims: [100, 100, 0.1], weight: 1 },
+                { name: "0.1 + 0.2 weight", dims: [10, 10, 10], weight: 0.1 + 0.2 },
+                { name: "Large oversize 31.49kg", dims: [130, 50, 50], weight: 31.49 },
+                { name: "Tiny weight (0.0001g)", dims: [10, 10, 10], weight: 0.0000001 }
+            ];
+            
+            let html = '<h2>Current Calculator Results:</h2>';
+            
+            debugCases.forEach(test => {
+                const dimensions = { height: test.dims[0], width: test.dims[1], depth: test.dims[2] };
+                const sortedDims = test.dims.sort((a, b) => b - a);
+                const dimensionalWeight = calculator.calculateDimensionalWeight(sortedDims[0], sortedDims[1], sortedDims[2]);
+                
+                const tier = calculator.determineSizeTier(dimensions, test.weight, dimensionalWeight);
+                const weightBracket = calculator.findWeightBracket(tier, test.weight);
+                const fee = calculator.calculateFee(tier, test.weight, 'UK', weightBracket);
+                
+                html += `
+                    <div style="margin: 15px 0; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
+                        <strong>${test.name}</strong><br>
+                        Dimensions: ${test.dims.join(' × ')} cm<br>
+                        Weight: ${test.weight} kg<br>
+                        Dimensional Weight: ${dimensionalWeight.toFixed(3)} kg<br>
+                        <strong>Result: ${tier.name}</strong><br>
+                        Fee: ${fee}
+                    </div>
+                `;
+            });
+            
+            document.getElementById('results').innerHTML = html;
+        });
+    </script>
+</body>
+</html>
