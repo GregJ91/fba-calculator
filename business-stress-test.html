@@ -245,15 +245,15 @@
             async testEnvelopeTiers(quickMode = false) {
                 const category = "Envelope Tiers (Based on FBA Requirements)";
                 const tests = [
-                    // Small envelope: ≤ 20x15x1 cm, ≤ 210g
-                    { name: "Small envelope - minimum", dims: [5, 5, 0.3], weight: 0.01, expected: "Small envelope" },
-                    { name: "Small envelope - 80g bracket", dims: [15, 10, 0.8], weight: 0.05, expected: "Small envelope" },
-                    { name: "Small envelope - 210g bracket", dims: [15, 10, 0.8], weight: 0.1, expected: "Small envelope" },
-                    { name: "Small envelope - at dimension limit", dims: [20, 15, 1], weight: 0.08, expected: "Small envelope" },
-                    { name: "Small envelope - at weight limit", dims: [15, 10, 0.8], weight: 0.21, expected: "Small envelope" },
+                    // Light envelope: ≤ 20x15x1 cm, ≤ 100g (new weight brackets: 20g, 40g, 60g, 80g, 100g)
+                    { name: "Light envelope - minimum", dims: [5, 5, 0.3], weight: 0.01, expected: "Light envelope" },
+                    { name: "Light envelope - 20g bracket", dims: [15, 10, 0.8], weight: 0.02, expected: "Light envelope" },
+                    { name: "Light envelope - 80g bracket", dims: [15, 10, 0.8], weight: 0.08, expected: "Light envelope" },
+                    { name: "Light envelope - at dimension limit", dims: [20, 15, 1], weight: 0.08, expected: "Light envelope" },
+                    { name: "Light envelope - at weight limit", dims: [15, 10, 0.8], weight: 0.1, expected: "Light envelope" },
                     
-                    // Standard envelope: ≤ 35x25x2.5 cm, ≤ 460g  
-                    { name: "Standard envelope - typical", dims: [30, 20, 2], weight: 0.2, expected: "Standard envelope" },
+                    // Standard envelope: ≤ 35x25x2.5 cm, ≤ 460g (new weight brackets: 210g, 460g)
+                    { name: "Standard envelope - 210g bracket", dims: [30, 20, 2], weight: 0.21, expected: "Standard envelope" },
                     { name: "Standard envelope - at limit", dims: [35, 25, 2.5], weight: 0.46, expected: "Standard envelope" },
                     
                     // Large envelope: ≤ 35x25x4 cm, ≤ 960g
@@ -299,13 +299,14 @@
                     { name: "Small oversize - with surcharge", dims: [50, 40, 30], weight: 2.5, expected: "Small oversize" },
                     { name: "Small oversize - at unit weight limit", dims: [50, 40, 30], weight: 4.76, expected: "Small oversize" },
                     
-                    // Standard oversize: ≤ 120x60x60 cm, < 32.9kg unit, < 68.4kg dimensional
-                    { name: "Standard oversize - typical", dims: [100, 50, 50], weight: 15.0, expected: "Standard oversize" },
-                    { name: "Standard oversize - high dimensional weight", dims: [120, 60, 60], weight: 10.0, expected: "Large oversize" }, // Dim weight = 86.4kg > 68.4kg
+                    // Standard oversize categories: ≤ 120x60x60 cm, < 32.9kg unit, < 68.4kg dimensional
+                    { name: "Standard oversize light - typical", dims: [80, 50, 40], weight: 0.5, expected: "Standard oversize light" },
+                    { name: "Standard oversize heavy - typical", dims: [100, 50, 50], weight: 10.0, expected: "Standard oversize heavy" },
+                    { name: "Standard oversize large - typical", dims: [90, 55, 45], weight: 0.7, expected: "Standard oversize large" },
                     
-                    // Large oversize: Exceeds Standard oversize limits but ≤ 31.5kg unit, < 108kg dimensional
-                    { name: "Large oversize - exceeds dimensions", dims: [130, 50, 50], weight: 25.0, expected: "Large oversize" },
-                    { name: "Large oversize - at weight limit", dims: [130, 50, 50], weight: 31.5, expected: "Special oversize" }, // 31.5kg is the limit, goes to Special oversize
+                    // Heavy oversize: Exceeds Standard oversize limits, ≤ 31.5kg base + incremental
+                    { name: "Heavy oversize - base fee", dims: [130, 50, 40], weight: 25.0, expected: "Heavy oversize" },
+                    { name: "Heavy oversize - incremental charges", dims: [130, 50, 40], weight: 40.0, expected: "Heavy oversize" },
                     
                     // Special oversize: Longest > 175cm or girth > 360cm or exceeds other limits
                     { name: "Special oversize - long dimension", dims: [200, 50, 50], weight: 20.0, expected: "Special oversize" },
@@ -322,10 +323,10 @@
                 const category = "Dimensional Weight Logic";
                 const tests = [
                     // Cases where dimensional weight should drive classification
-                    { name: "Light but bulky item", dims: [60, 60, 60], weight: 1.0, expected: "Standard oversize" }, // Dim weight = 43.2kg
+                    { name: "Light but bulky item", dims: [60, 60, 60], weight: 1.0, expected: "Standard oversize large" }, // Dim weight = 43.2kg
                     { name: "Dimensional weight pushes tier", dims: [40, 30, 25], weight: 5.0, expected: "Standard parcel" }, // Dim weight = 6kg vs unit 5kg
-                    { name: "Heavy compact item", dims: [20, 20, 20], weight: 15.0, expected: "Standard oversize" }, // Unit weight drives
-                    { name: "Balanced weights", dims: [35.2, 35.2, 35.2], weight: 8.7, expected: "Standard oversize" }, // Both ~8.7kg
+                    { name: "Heavy compact item", dims: [20, 20, 20], weight: 15.0, expected: "Standard oversize heavy" }, // Unit weight drives
+                    { name: "Balanced weights", dims: [35.2, 35.2, 35.2], weight: 8.7, expected: "Standard oversize heavy" }, // Both ~8.7kg
                 ];
 
                 const testSet = quickMode ? tests.slice(0, 3) : tests;
@@ -336,10 +337,10 @@
             async testWeightBrackets(quickMode = false) {
                 const category = "Weight Bracket Accuracy";
                 const tests = [
-                    // Test exact bracket boundaries
-                    { name: "Small envelope 80g bracket", dims: [15, 10, 0.8], weight: 0.08, expected: "Small envelope" },
-                    { name: "Small envelope 210g bracket", dims: [15, 10, 0.8], weight: 0.21, expected: "Small envelope" },
-                    { name: "Standard envelope 60g bracket", dims: [30, 20, 2], weight: 0.06, expected: "Standard envelope" },
+                    // Test exact bracket boundaries (updated for new weight structure)
+                    { name: "Light envelope 20g bracket", dims: [15, 10, 0.8], weight: 0.02, expected: "Light envelope" },
+                    { name: "Light envelope 80g bracket", dims: [15, 10, 0.8], weight: 0.08, expected: "Light envelope" },
+                    { name: "Light envelope 100g bracket", dims: [15, 10, 0.8], weight: 0.1, expected: "Light envelope" },
                     { name: "Standard envelope 210g bracket", dims: [30, 20, 2], weight: 0.21, expected: "Standard envelope" },
                     { name: "Standard envelope 460g bracket", dims: [30, 20, 2], weight: 0.46, expected: "Standard envelope" },
                     { name: "Small parcel 150g bracket", dims: [30, 20, 10], weight: 0.15, expected: "Small parcel" },
@@ -354,15 +355,19 @@
             async testSurchargeLogic(quickMode = false) {
                 const category = "Surcharge Logic";
                 const tests = [
-                    // Small oversize surcharges (>1.76kg)
-                    { name: "Small oversize no surcharge", dims: [50, 40, 30], weight: 1.76, expected: "Small oversize" },
-                    { name: "Small oversize with surcharge", dims: [50, 40, 30], weight: 2.0, expected: "Small oversize" },
+                    // Small oversize incremental charges (>760g)
+                    { name: "Small oversize base fee", dims: [50, 40, 30], weight: 0.76, expected: "Small oversize" },
+                    { name: "Small oversize with incremental", dims: [50, 40, 30], weight: 2.0, expected: "Small oversize" },
                     
-                    // Standard oversize surcharges (>29.76kg) 
-                    { name: "Standard oversize no surcharge", dims: [100, 50, 50], weight: 29.76, expected: "Standard oversize" },
-                    { name: "Standard oversize with surcharge", dims: [100, 50, 50], weight: 32.0, expected: "Standard oversize" },
+                    // Standard oversize heavy incremental charges (>15.76kg)
+                    { name: "Standard oversize heavy base fee", dims: [100, 50, 50], weight: 15.76, expected: "Standard oversize heavy" },
+                    { name: "Standard oversize heavy with incremental", dims: [100, 50, 50], weight: 20.0, expected: "Standard oversize heavy" },
                     
-                    // Special oversize additional charges (>60kg)
+                    // Heavy oversize incremental charges (>31.5kg)
+                    { name: "Heavy oversize base fee", dims: [130, 50, 40], weight: 31.5, expected: "Heavy oversize" },
+                    { name: "Heavy oversize with incremental", dims: [130, 50, 40], weight: 40.0, expected: "Heavy oversize" },
+                    
+                    // Special oversize incremental charges (>60kg)
                     { name: "Special oversize under 60kg", dims: [200, 50, 50], weight: 50.0, expected: "Special oversize" },
                     { name: "Special oversize over 60kg", dims: [200, 50, 50], weight: 70.0, expected: "Special oversize" },
                 ];
@@ -374,7 +379,7 @@
             // Test multi-zone support
             async testMultiZoneSupport(quickMode = false) {
                 const category = "Multi-Zone Support";
-                const baseTest = { dims: [15, 10, 0.8], weight: 0.05, expected: "Small envelope" };
+                const baseTest = { dims: [15, 10, 0.8], weight: 0.05, expected: "Light envelope" };
                 const zones = quickMode ? ['UK', 'DE', 'SE'] : ['UK', 'DE', 'FR', 'IT', 'ES', 'NL', 'SE', 'PL', 'BE'];
                 
                 const tests = zones.map(zone => ({
@@ -391,14 +396,14 @@
                 const category = "Business-Critical Boundaries";
                 const tests = [
                     // Critical tier transitions
-                    { name: "Small to Standard envelope transition", dims: [20.1, 15, 1], weight: 0.08, expected: "Standard envelope" },
+                    { name: "Light to Standard envelope transition", dims: [20.1, 15, 1], weight: 0.08, expected: "Standard envelope" },
                     { name: "Standard to Large envelope transition", dims: [35, 25, 2.6], weight: 0.46, expected: "Large envelope" },
                     { name: "Large to Extra-large envelope transition", dims: [35, 25, 4.1], weight: 0.96, expected: "Extra-large envelope" },
-                    { name: "Parcel to oversize transition", dims: [45.1, 34, 26], weight: 11.9, expected: "Standard oversize" }, // Exceeds parcel dims, weight >11.9kg
+                    { name: "Parcel to oversize transition", dims: [45.1, 34, 26], weight: 11.9, expected: "Standard oversize heavy" }, // Exceeds parcel dims, weight >11.9kg
                     
                     // Weight-driven transitions
                     { name: "Small parcel weight limit", dims: [30, 20, 10], weight: 3.91, expected: "Standard parcel" },
-                    { name: "Standard parcel weight limit", dims: [40, 30, 20], weight: 11.91, expected: "Standard oversize" }, // Exceeds 11.9kg weight limit
+                    { name: "Standard parcel weight limit", dims: [40, 30, 20], weight: 11.91, expected: "Standard oversize heavy" }, // Exceeds 11.9kg weight limit
                     
                     // Special oversize triggers
                     { name: "Length triggers Special oversize", dims: [175.1, 50, 50], weight: 20.0, expected: "Special oversize" },
@@ -418,12 +423,12 @@
                     { name: "DVD", dims: [19, 14, 1.5], weight: 0.1, expected: "Standard envelope" }, // 1.5cm depth exceeds Small envelope 1cm limit
                     { name: "Phone case", dims: [20, 12, 2], weight: 0.15, expected: "Standard envelope" },
                     { name: "Laptop", dims: [35, 25, 3], weight: 2.5, expected: "Small parcel" },
-                    { name: "Monitor", dims: [70, 50, 20], weight: 8.0, expected: "Standard oversize" },
+                    { name: "Monitor", dims: [70, 50, 20], weight: 8.0, expected: "Standard oversize heavy" },
                     { name: "Mattress", dims: [200, 150, 30], weight: 25.0, expected: "Special oversize" },
-                    { name: "Heavy tool", dims: [30, 20, 15], weight: 15.0, expected: "Standard oversize" },
-                    { name: "Large art print", dims: [100, 70, 5], weight: 2.0, expected: "Large oversize" }, // Exceeds 120x60x60 dimensions
+                    { name: "Heavy tool", dims: [30, 20, 15], weight: 15.0, expected: "Standard oversize heavy" },
+                    { name: "Large art print", dims: [100, 70, 5], weight: 2.0, expected: "Heavy oversize" }, // Exceeds 120x60x60 dimensions
                     { name: "Pillow (light but bulky)", dims: [60, 40, 20], weight: 1.0, expected: "Small oversize" },
-                    { name: "Exercise equipment", dims: [120, 50, 40], weight: 30.0, expected: "Standard oversize" }, // Fits 120x60x60, weight <33kg, dim weight <68.4kg
+                    { name: "Exercise equipment", dims: [120, 50, 40], weight: 30.0, expected: "Standard oversize heavy" }, // Fits 120x60x60, weight <33kg, dim weight <68.4kg
                 ];
 
                 const testSet = quickMode ? tests.slice(0, 5) : tests;

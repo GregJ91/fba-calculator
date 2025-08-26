@@ -1,0 +1,22 @@
+Test ID,Test Name,Length (cm),Width (cm),Height (cm),Weight (kg),Expected Size Tier,Expected Weight Bracket,Zone,Business Scenario,Critical Boundary,Notes
+BST-001,Small Envelope Maximum,20,15,1,0.21,Small envelope,210g bracket,UK,Letter/document,Dimension & weight limits,At maximum dimensions and weight for Small envelope
+BST-002,Standard Envelope Transition,20.1,15,1,0.08,Standard envelope,80g bracket,UK,Thick letter,Dimension boundary,Just exceeds Small envelope length limit
+BST-003,Large Envelope Depth Test,35,25,4,0.96,Large envelope,960g bracket,UK,Thick catalog,Depth boundary,At maximum depth for Large envelope category
+BST-004,Extra-Large Envelope Max,35,25,6,0.96,Extra-large envelope,960g bracket,UK,Padded envelope,Maximum envelope size,Largest possible envelope configuration
+BST-005,Small Parcel Weight Limit,35,25,12,3.9,Small parcel,3.9kg bracket,UK,Small electronics,Weight boundary,At maximum weight for Small parcel
+BST-006,Standard Parcel Transition,45.1,34,26,11.9,Standard oversize,Base rate,UK,Large box,Dimension boundary,Just exceeds Standard parcel dimensions
+BST-007,Heavy Compact Item,30,20,15,15,Standard oversize,Base rate,UK,Heavy tool,Weight-driven classification,Heavy item in compact size
+BST-008,Small Oversize Surcharge,50,40,30,2.5,Small oversize,With surcharge,UK,Home goods,Surcharge threshold,Above 1.76kg surcharge threshold
+BST-009,Standard Oversize Typical,100,50,50,15,Standard oversize,Base rate,UK,Furniture piece,Standard oversize,Typical Standard oversize item
+BST-010,Large Oversize Dimensional,120,60,60,10,Large oversize,Base rate,UK,Bulky lightweight,Dimensional weight,High dimensional weight pushes to Large oversize
+BST-011,Large Oversize Weight Edge,130,50,50,31.4,Large oversize,High weight bracket,UK,Large appliance,Weight boundary,Just under 31.5kg weight limit
+BST-012,Special Oversize Weight,130,50,50,31.5,Special oversize,Base rate,UK,Heavy appliance,Weight limit,Exactly at 31.5kg weight limit
+BST-013,Special Oversize Length,180,50,50,20,Special oversize,Base rate,UK,Long item,Length trigger,Exceeds 175cm length limit
+BST-014,Special Oversize Girth,120,90,90,20,Special oversize,Base rate,UK,Bulky item,Girth trigger,Girth = 480cm exceeds 360cm limit
+BST-015,Real World - Book,24,16,2,0.5,Large envelope,500g bracket,UK,Hardcover book,Common product,Typical book dimensions and weight
+BST-016,Real World - Laptop,35,25,3,2.5,Small parcel,2.5kg bracket,UK,Consumer electronics,Common product,Standard laptop packaging
+BST-017,Real World - Monitor,70,50,20,8,Standard oversize,Base rate,UK,Computer monitor,Common product,Typical monitor with packaging
+BST-018,Multi-Zone Test,15,10,0.8,0.05,Small envelope,80g bracket,DE,International shipping,Zone variation,Same item different zone
+BST-019,Dimensional Weight Edge,45,35,35,5,Standard oversize,Base rate,UK,Lightweight bulky,Dimensional weight,Dimensional weight (5.51kg) drives classification
+BST-020,Performance Stress,42.5,33.2,25.8,11.85,Standard parcel,11.85kg bracket,UK,Edge case precision,Floating point precision,Tests precision handling near boundaries
+
