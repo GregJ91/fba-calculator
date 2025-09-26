@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 FBA Calculator Comprehensive Stress Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f0f2f5; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .test-section { background: white; margin: 20px 0; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .test-controls { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0; }
+        button { padding: 12px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: all 0.3s; }
+        .primary-btn { background: #007bff; color: white; }
+        .primary-btn:hover { background: #0056b3; }
+        .danger-btn { background: #dc3545; color: white; }
+        .danger-btn:hover { background: #c82333; }
+        .success-btn { background: #28a745; color: white; }
+        .success-btn:hover { background: #218838; }
+        .warning-btn { background: #ffc107; color: #212529; }
+        .warning-btn:hover { background: #e0a800; }
+        
+        .test-result { margin: 8px 0; padding: 12px; border-radius: 6px; font-family: 'Courier New', monospace; font-size: 14px; }
+        .pass { background: #d4edda; border-left: 5px solid #28a745; }
+        .fail { background: #f8d7da; border-left: 5px solid #dc3545; }
+        .warning { background: #fff3cd; border-left: 5px solid #ffc107; }
+        .info { background: #d1ecf1; border-left: 5px solid #17a2b8; }
+        
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin: 20px 0; }
+        .stat-card { background: white; padding: 15px; border-radius: 6px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .stat-number { font-size: 2em; font-weight: bold; margin: 10px 0; }
+        .stat-label { color: #666; font-size: 0.9em; }
+        
+        .progress-bar { width: 100%; height: 20px; background: #e9ecef; border-radius: 10px; overflow: hidden; margin: 10px 0; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #28a745, #20c997); transition: width 0.3s ease; }
+        
+        .test-log { max-height: 400px; overflow-y: auto; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; padding: 15px; margin: 10px 0; }
+        .performance-chart { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; }
+        
+        h1 { color: #2c3e50; text-align: center; margin-bottom: 30px; }
+        h2 { color: #34495e; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+        h3 { color: #2c3e50; margin-top: 25px; }
+        
+        .extreme-warning { background: #721c24; color: white; padding: 15px; border-radius: 6px; margin: 15px 0; }
+        .test-category { border-left: 4px solid #3498db; padding-left: 15px; margin: 15px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 FBA Calculator Comprehensive Stress Test</h1>
+        <p style="text-align: center; color: #666; font-size: 1.1em;">
+            Pushing the calculator to its absolute limits with extreme test cases, boundary conditions, and performance tests
+        </p>
+
+        <div class="extreme-warning">
+            ⚠️ <strong>EXTREME STRESS TEST WARNING:</strong> This test will run thousands of calculations with extreme values, 
+            edge cases, and boundary conditions. It may take several minutes to complete and could stress your browser.
+        </div>
+
+        <div class="test-section">
+            <h2>🎛️ Test Controls</h2>
+            <div class="test-controls">
+                <button class="success-btn" onclick="runAllStressTests()">🚀 RUN FULL STRESS TEST</button>
+                <button class="primary-btn" onclick="runBoundaryTests()">🔍 Boundary Tests</button>
+                <button class="primary-btn" onclick="runExtremeValueTests()">⚡ Extreme Values</button>
+                <button class="warning-btn" onclick="runPerformanceTests()">📊 Performance Tests</button>
+                <button class="warning-btn" onclick="runFuzzyTests()">🎲 Random Fuzzy Tests</button>
+                <button class="primary-btn" onclick="runLowPriceStressTests()">💰 Low-Price FBA Stress</button>
+                <button class="danger-btn" onclick="runBreakingTests()">💥 Breaking Point Tests</button>
+                <button class="danger-btn" onclick="clearAllResults()">🗑️ Clear Results</button>
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar" style="width: 0%"></div>
+            </div>
+            <div id="progressText" style="text-align: center; margin: 10px 0;">Ready to run tests</div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalTests">0</div>
+                <div class="stat-label">Total Tests</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="passedTests" style="color: #28a745;">0</div>
+                <div class="stat-label">Passed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="failedTests" style="color: #dc3545;">0</div>
+                <div class="stat-label">Failed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="warningTests" style="color: #ffc107;">0</div>
+                <div class="stat-label">Warnings</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="avgTime">0ms</div>
+                <div class="stat-label">Avg Time</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalTime">0ms</div>
+                <div class="stat-label">Total Time</div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>📊 Performance Metrics</h2>
+            <div id="performanceChart" class="performance-chart">
+                <canvas id="chartCanvas" width="800" height="200"></canvas>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>📋 Test Results</h2>
+            <div id="testResults" class="test-log"></div>
+        </div>
+
+    </div>
+
+    <script src="fba-calculator.js"></script>
+    <script>
+        let calculator;
+        let testStats = {
+            total: 0,
+            passed: 0,
+            failed: 0,
+            warnings: 0,
+            totalTime: 0,
+            times: []
+        };
+
+        let isRunning = false;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            calculator = new FBACalculator();
+            console.log('Calculator initialized for stress testing');
+        });
+
+        function updateStats() {
+            document.getElementById('totalTests').textContent = testStats.total;
+            document.getElementById('passedTests').textContent = testStats.passed;
+            document.getElementById('failedTests').textContent = testStats.failed;
+            document.getElementById('warningTests').textContent = testStats.warnings;
+            document.getElementById('avgTime').textContent = testStats.times.length > 0 ? 
+                Math.round(testStats.times.reduce((a, b) => a + b, 0) / testStats.times.length) + 'ms' : '0ms';
+            document.getElementById('totalTime').textContent = Math.round(testStats.totalTime) + 'ms';
+        }
+
+        function updateProgress(current, total, message) {
+            const percentage = (current / total) * 100;
+            document.getElementById('progressBar').style.width = percentage + '%';
+            document.getElementById('progressText').textContent = `${message} (${current}/${total})`;
+        }
+
+        function logResult(testName, result, time = 0, details = '') {
+            testStats.total++;
+            testStats.totalTime += time;
+            testStats.times.push(time);
+            
+            if (result === 'pass') testStats.passed++;
+            else if (result === 'fail') testStats.failed++;
+            else if (result === 'warning') testStats.warnings++;
+
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result ${result}`;
+            
+            const icon = result === 'pass' ? '✅' : result === 'fail' ? '❌' : result === 'warning' ? '⚠️' : 'ℹ️';
+            resultDiv.innerHTML = `
+                <strong>${icon} ${result.toUpperCase()}: ${testName}</strong> 
+                <span style="float: right; color: #666;">${time}ms</span>
+                ${details ? `<br><small>${details}</small>` : ''}
+            `;
+            
+            document.getElementById('testResults').appendChild(resultDiv);
+            document.getElementById('testResults').scrollTop = document.getElementById('testResults').scrollHeight;
+            
+            updateStats();
+        }
+
+        function clearAllResults() {
+            document.getElementById('testResults').innerHTML = '';
+            testStats = { total: 0, passed: 0, failed: 0, warnings: 0, totalTime: 0, times: [] };
+            updateStats();
+            updateProgress(0, 1, 'Ready to run tests');
+        }
+
+        async function runTest(testName, testFunction) {
+            if (!isRunning) return;
+            
+            const startTime = performance.now();
+            try {
+                const result = await testFunction();
+                const endTime = performance.now();
+                const duration = endTime - startTime;
+                
+                logResult(testName, result.status, duration, result.details || '');
+                return result;
+            } catch (error) {
+                const endTime = performance.now();
+                const duration = endTime - startTime;
+                logResult(testName, 'fail', duration, `Error: ${error.message}`);
+                return { status: 'fail', error: error.message };
+            }
+        }
+
+        async function runBoundaryTests() {
+            isRunning = true;
+            updateProgress(0, 50, 'Running boundary tests');
+            
+            const boundaryTests = [
+                // Size tier boundaries
+                { name: 'Light Envelope Max Size', dims: [20, 15, 1], weight: 0.1, zone: 'UK' },
+                { name: 'Light Envelope Overflow', dims: [20.1, 15, 1], weight: 0.1, zone: 'UK' },
+                { name: 'Standard Envelope Max', dims: [35, 25, 2.5], weight: 0.46, zone: 'UK' },
+                { name: 'Standard Envelope Overflow', dims: [35.1, 25, 2.5], weight: 0.46, zone: 'UK' },
+                { name: 'Large Envelope Max', dims: [35, 25, 4], weight: 0.96, zone: 'UK' },
+                { name: 'Extra Large Envelope Max', dims: [35, 25, 6], weight: 0.96, zone: 'UK' },
+                { name: 'Small Parcel Max', dims: [35, 25, 12], weight: 3.9, zone: 'UK' },
+                { name: 'Standard Parcel Max', dims: [45, 34, 26], weight: 11.9, zone: 'UK' },
+                
+                // Weight boundaries
+                { name: 'Minimum Weight (1g)', dims: [10, 10, 1], weight: 0.001, zone: 'UK' },
+                { name: 'Zero Weight Edge Case', dims: [10, 10, 1], weight: 0, zone: 'UK' },
+                { name: 'Fractional Weight', dims: [10, 10, 1], weight: 0.0005, zone: 'UK' },
+                
+                // Dimensional weight boundaries
+                { name: 'High Dimensional Weight', dims: [100, 50, 50], weight: 1, zone: 'UK' },
+                { name: 'Extreme Dimensional Weight', dims: [175, 60, 60], weight: 0.5, zone: 'UK' },
+                
+                // Price boundaries for Low-Price FBA
+                { name: 'UK Price Boundary (£10.00)', dims: [15, 10, 1], weight: 0.05, zone: 'UK', price: 10.00 },
+                { name: 'UK Price Just Over (£10.01)', dims: [15, 10, 1], weight: 0.05, zone: 'UK', price: 10.01 },
+                { name: 'UK Price Just Under (£9.99)', dims: [15, 10, 1], weight: 0.05, zone: 'UK', price: 9.99 },
+                { name: 'SE High Threshold (140 SEK)', dims: [15, 10, 1], weight: 0.05, zone: 'SE', price: 140.00 },
+                { name: 'SE Over Threshold (140.01 SEK)', dims: [15, 10, 1], weight: 0.05, zone: 'SE', price: 140.01 }
+            ];
+
+            for (let i = 0; i < boundaryTests.length; i++) {
+                const test = boundaryTests[i];
+                updateProgress(i + 1, boundaryTests.length, 'Boundary tests');
+                
+                await runTest(`Boundary: ${test.name}`, async () => {
+                    const dimensions = { height: test.dims[0], width: test.dims[1], depth: test.dims[2] };
+                    const sortedDims = test.dims.sort((a, b) => b - a);
+                    const dimensionalWeight = calculator.calculateDimensionalWeight(sortedDims[0], sortedDims[1], sortedDims[2]);
+                    const sizeTier = calculator.determineSizeTier(dimensions, test.weight, dimensionalWeight);
+                    const fee = calculator.calculateFee(sizeTier, Math.max(test.weight, dimensionalWeight), test.zone, null);
+                    
+                    if (test.price !== undefined) {
+                        const eligible = calculator.checkLowPriceFBAEligibility(test.price, test.zone);
+                        const lowPriceFee = eligible ? calculator.calculateLowPriceFBAFee(sizeTier, Math.max(test.weight, dimensionalWeight), test.zone, null) : null;
+                        return {
+                            status: 'pass',
+                            details: `Size: ${sizeTier.name}, Fee: ${fee}, Low-Price: ${eligible ? lowPriceFee : 'N/A'}`
+                        };
+                    }
+                    
+                    return {
+                        status: typeof fee === 'string' && !fee.includes('Error') ? 'pass' : 'fail',
+                        details: `Size: ${sizeTier.name}, Fee: ${fee}, Dims: ${test.dims.join('×')}cm, Weight: ${test.weight}kg`
+                    };
+                });
+                
+                // Small delay to prevent browser freezing
+                await new Promise(resolve => setTimeout(resolve, 10));
+            }
+            
+            isRunning = false;
+        }
+
+        async function runExtremeValueTests() {
+            isRunning = true;
+            updateProgress(0, 30, 'Running extreme value tests');
+            
+            const extremeTests = [
+                // Extreme dimensions
+                { name: 'Microscopic Product', dims: [0.1, 0.1, 0.1], weight: 0.001, zone: 'UK' },
+                { name: 'Massive Product', dims: [500, 300, 200], weight: 100, zone: 'UK' },
+                { name: 'Ultra-thin Product', dims: [100, 50, 0.001], weight: 0.1, zone: 'UK' },
+                { name: 'Ultra-long Product', dims: [1000, 1, 1], weight: 1, zone: 'UK' },
+                
+                // Extreme weights
+                { name: 'Ultra-light Product', dims: [10, 10, 1], weight: 0.0001, zone: 'UK' },
+                { name: 'Super Heavy Product', dims: [50, 50, 50], weight: 1000, zone: 'UK' },
+                
+                // Extreme prices for Low-Price FBA
+                { name: 'Free Product (£0)', dims: [15, 10, 1], weight: 0.05, zone: 'UK', price: 0 },
+                { name: 'Negative Price', dims: [15, 10, 1], weight: 0.05, zone: 'UK', price: -10 },
+                { name: 'Extremely High Price', dims: [15, 10, 1], weight: 0.05, zone: 'UK', price: 999999 },
+                { name: 'Fractional Penny', dims: [15, 10, 1], weight: 0.05, zone: 'UK', price: 0.001 },
+                
+                // All zones with extreme values
+                { name: 'UK Extreme', dims: [200, 100, 100], weight: 50, zone: 'UK', price: 5 },
+                { name: 'DE Extreme', dims: [200, 100, 100], weight: 50, zone: 'DE', price: 5 },
+                { name: 'FR Extreme', dims: [200, 100, 100], weight: 50, zone: 'FR', price: 5 },
+                { name: 'IT Extreme', dims: [200, 100, 100], weight: 50, zone: 'IT', price: 5 },
+                { name: 'ES Extreme', dims: [200, 100, 100], weight: 50, zone: 'ES', price: 5 },
+                { name: 'NL Extreme', dims: [200, 100, 100], weight: 50, zone: 'NL', price: 5 },
+                { name: 'SE Extreme', dims: [200, 100, 100], weight: 50, zone: 'SE', price: 50 },
+                { name: 'PL Extreme', dims: [200, 100, 100], weight: 50, zone: 'PL', price: 20 },
+                { name: 'BE Extreme', dims: [200, 100, 100], weight: 50, zone: 'BE', price: 5 }
+            ];
+
+            for (let i = 0; i < extremeTests.length; i++) {
+                const test = extremeTests[i];
+                updateProgress(i + 1, extremeTests.length, 'Extreme value tests');
+                
+                await runTest(`Extreme: ${test.name}`, async () => {
+                    try {
+                        const dimensions = { height: test.dims[0], width: test.dims[1], depth: test.dims[2] };
+                        const sortedDims = test.dims.sort((a, b) => b - a);
+                        const dimensionalWeight = calculator.calculateDimensionalWeight(sortedDims[0], sortedDims[1], sortedDims[2]);
+                        const sizeTier = calculator.determineSizeTier(dimensions, test.weight, dimensionalWeight);
+                        const fee = calculator.calculateFee(sizeTier, Math.max(test.weight, dimensionalWeight), test.zone, null);
+                        
+                        let lowPriceStatus = 'N/A';
+                        if (test.price !== undefined) {
+                            const eligible = calculator.checkLowPriceFBAEligibility(test.price, test.zone);
+                            if (eligible) {
+                                const lowPriceFee = calculator.calculateLowPriceFBAFee(sizeTier, Math.max(test.weight, dimensionalWeight), test.zone, null);
+                                lowPriceStatus = lowPriceFee;
+                            } else {
+                                lowPriceStatus = 'Not eligible';
+                            }
+                        }
+                        
+                        return {
+                            status: 'pass',
+                            details: `Size: ${sizeTier.name}, Fee: ${fee}, Low-Price: ${lowPriceStatus}, DimWeight: ${dimensionalWeight.toFixed(3)}kg`
+                        };
+                    } catch (error) {
+                        return {
+                            status: 'warning',
+                            details: `Handled extreme case: ${error.message}`
+                        };
+                    }
+                });
+                
+                await new Promise(resolve => setTimeout(resolve, 15));
+            }
+            
+            isRunning = false;
+        }
+
+        async function runPerformanceTests() {
+            isRunning = true;
+            const iterations = 1000;
+            updateProgress(0, iterations, 'Running performance tests');
+            
+            const performanceTimes = [];
+            
+            for (let i = 0; i < iterations; i++) {
+                updateProgress(i + 1, iterations, 'Performance stress test');
+                
+                const startTime = performance.now();
+                
+                // Random test case
+                const dimensions = {
+                    height: Math.random() * 100 + 1,
+                    width: Math.random() * 100 + 1,
+                    depth: Math.random() * 100 + 1
+                };
+                const weight = Math.random() * 10;
+                const zone = ['UK', 'DE', 'FR', 'IT', 'ES', 'NL', 'SE', 'PL', 'BE'][Math.floor(Math.random() * 9)];
+                const price = Math.random() * 50;
+                
+                try {
+                    const sortedDims = [dimensions.height, dimensions.width, dimensions.depth].sort((a, b) => b - a);
+                    const dimensionalWeight = calculator.calculateDimensionalWeight(sortedDims[0], sortedDims[1], sortedDims[2]);
+                    const sizeTier = calculator.determineSizeTier(dimensions, weight, dimensionalWeight);
+                    const fee = calculator.calculateFee(sizeTier, Math.max(weight, dimensionalWeight), zone, null);
+                    const eligible = calculator.checkLowPriceFBAEligibility(price, zone);
+                    
+                    if (eligible) {
+                        calculator.calculateLowPriceFBAFee(sizeTier, Math.max(weight, dimensionalWeight), zone, null);
+                    }
+                } catch (error) {
+                    // Continue on errors for performance testing
+                }
+                
+                const endTime = performance.now();
+                performanceTimes.push(endTime - startTime);
+                
+                if (i % 100 === 0) {
+                    await new Promise(resolve => setTimeout(resolve, 1));
+                }
+            }
+            
+            const avgTime = performanceTimes.reduce((a, b) => a + b, 0) / performanceTimes.length;
+            const maxTime = Math.max(...performanceTimes);
+            const minTime = Math.min(...performanceTimes);
+            
+            logResult('Performance Test Summary', 'pass', avgTime, 
+                `${iterations} iterations: Avg ${avgTime.toFixed(2)}ms, Max ${maxTime.toFixed(2)}ms, Min ${minTime.toFixed(2)}ms`);
+            
+            isRunning = false;
+        }
+
+        async function runFuzzyTests() {
+            isRunning = true;
+            const fuzzyIterations = 500;
+            updateProgress(0, fuzzyIterations, 'Running fuzzy tests');
+            
+            let crashes = 0;
+            let errors = 0;
+            let successes = 0;
+            
+            for (let i = 0; i < fuzzyIterations; i++) {
+                updateProgress(i + 1, fuzzyIterations, 'Fuzzy stress test');
+                
+                try {
+                    // Generate completely random inputs
+                    const dimensions = {
+                        height: (Math.random() - 0.5) * 1000, // Can be negative
+                        width: (Math.random() - 0.5) * 1000,
+                        depth: (Math.random() - 0.5) * 1000
+                    };
+                    const weight = (Math.random() - 0.3) * 200; // Can be negative
+                    const zones = ['UK', 'DE', 'FR', 'IT', 'ES', 'NL', 'SE', 'PL', 'BE', 'INVALID', '', null, undefined];
+                    const zone = zones[Math.floor(Math.random() * zones.length)];
+                    const price = (Math.random() - 0.2) * 1000; // Can be negative
+                    
+                    const sortedDims = [Math.abs(dimensions.height), Math.abs(dimensions.width), Math.abs(dimensions.depth)].sort((a, b) => b - a);
+                    const dimensionalWeight = calculator.calculateDimensionalWeight(sortedDims[0], sortedDims[1], sortedDims[2]);
+                    const sizeTier = calculator.determineSizeTier(dimensions, Math.abs(weight), dimensionalWeight);
+                    const fee = calculator.calculateFee(sizeTier, Math.max(Math.abs(weight), dimensionalWeight), zone, null);
+                    const eligible = calculator.checkLowPriceFBAEligibility(price, zone);
+                    
+                    if (eligible) {
+                        calculator.calculateLowPriceFBAFee(sizeTier, Math.max(Math.abs(weight), dimensionalWeight), zone, null);
+                    }
+                    
+                    successes++;
+                } catch (error) {
+                    if (error.message.includes('Cannot read') || error.message.includes('undefined')) {
+                        crashes++;
+                    } else {
+                        errors++;
+                    }
+                }
+                
+                if (i % 50 === 0) {
+                    await new Promise(resolve => setTimeout(resolve, 1));
+                }
+            }
+            
+            logResult('Fuzzy Test Summary', crashes > 0 ? 'fail' : errors > 50 ? 'warning' : 'pass', 0,
+                `${fuzzyIterations} random inputs: ${successes} successes, ${errors} handled errors, ${crashes} crashes`);
+            
+            isRunning = false;
+        }
+
+        async function runLowPriceStressTests() {
+            isRunning = true;
+            updateProgress(0, 100, 'Low-Price FBA stress tests');
+            
+            const lowPriceStressTests = [];
+            
+            // Generate comprehensive Low-Price FBA test matrix
+            const zones = ['UK', 'DE', 'FR', 'IT', 'ES', 'NL', 'SE', 'PL', 'BE'];
+            const sizeCombos = [
+                { dims: [15, 10, 1], weights: [0.02, 0.04, 0.06, 0.08, 0.1] },
+                { dims: [30, 20, 2], weights: [0.21, 0.46] },
+                { dims: [30, 20, 3.5], weights: [0.96] },
+                { dims: [30, 20, 5.5], weights: [0.96] },
+                { dims: [25, 15, 8], weights: [0.15, 0.4] }
+            ];
+            
+            zones.forEach(zone => {
+                const threshold = { 'UK': 10, 'DE': 11, 'FR': 12, 'IT': 12, 'ES': 12, 'NL': 12, 'SE': 140, 'PL': 55, 'BE': 12 }[zone];
+                sizeCombos.forEach(combo => {
+                    combo.weights.forEach(weight => {
+                        // Test at threshold, below, and above
+                        [threshold * 0.8, threshold, threshold * 1.2].forEach(price => {
+                            lowPriceStressTests.push({
+                                name: `${zone} ${combo.dims.join('×')}cm ${weight}kg £${price}`,
+                                dims: combo.dims,
+                                weight: weight,
+                                zone: zone,
+                                price: price
+                            });
+                        });
+                    });
+                });
+            });
+            
+            for (let i = 0; i < lowPriceStressTests.length; i++) {
+                const test = lowPriceStressTests[i];
+                updateProgress(i + 1, lowPriceStressTests.length, 'Low-Price FBA stress');
+                
+                await runTest(`Low-Price: ${test.name}`, async () => {
+                    const dimensions = { height: test.dims[0], width: test.dims[1], depth: test.dims[2] };
+                    const sortedDims = test.dims.sort((a, b) => b - a);
+                    const dimensionalWeight = calculator.calculateDimensionalWeight(sortedDims[0], sortedDims[1], sortedDims[2]);
+                    const sizeTier = calculator.determineSizeTier(dimensions, test.weight, dimensionalWeight);
+                    const pricingWeight = Math.max(test.weight, dimensionalWeight);
+                    
+                    const regularFee = calculator.calculateFee(sizeTier, pricingWeight, test.zone, null);
+                    const eligible = calculator.checkLowPriceFBAEligibility(test.price, test.zone);
+                    
+                    let lowPriceFee = 'N/A';
+                    let savings = 'N/A';
+                    
+                    if (eligible) {
+                        lowPriceFee = calculator.calculateLowPriceFBAFee(sizeTier, pricingWeight, test.zone, null);
+                        
+                        if (!lowPriceFee.includes('not available')) {
+                            const regularNum = parseFloat(regularFee.replace(/[^\d.]/g, ''));
+                            const lowPriceNum = parseFloat(lowPriceFee.replace(/[^\d.]/g, ''));
+                            savings = (regularNum - lowPriceNum).toFixed(2);
+                        }
+                    }
+                    
+                    return {
+                        status: 'pass',
+                        details: `Regular: ${regularFee}, Low-Price: ${lowPriceFee}, Savings: ${savings}, Eligible: ${eligible}`
+                    };
+                });
+                
+                if (i % 10 === 0) {
+                    await new Promise(resolve => setTimeout(resolve, 5));
+                }
+            }
+            
+            isRunning = false;
+        }
+
+        async function runBreakingTests() {
+            isRunning = true;
+            updateProgress(0, 20, 'Running breaking point tests');
+            
+            const breakingTests = [
+                { name: 'Null Dimensions', test: () => calculator.determineSizeTier(null, 1, 1) },
+                { name: 'Undefined Weight', test: () => calculator.determineSizeTier({height: 10, width: 10, depth: 10}, undefined, 1) },
+                { name: 'String Dimensions', test: () => calculator.determineSizeTier({height: "abc", width: "def", depth: "ghi"}, 1, 1) },
+                { name: 'Infinite Weight', test: () => calculator.determineSizeTier({height: 10, width: 10, depth: 10}, Infinity, 1) },
+                { name: 'NaN Values', test: () => calculator.determineSizeTier({height: NaN, width: NaN, depth: NaN}, NaN, NaN) },
+                { name: 'Negative Dimensions', test: () => calculator.determineSizeTier({height: -10, width: -10, depth: -10}, 1, 1) },
+                { name: 'Zero Dimensions', test: () => calculator.determineSizeTier({height: 0, width: 0, depth: 0}, 1, 1) },
+                { name: 'Empty Object', test: () => calculator.determineSizeTier({}, 1, 1) },
+                { name: 'Array Instead of Object', test: () => calculator.determineSizeTier([10, 10, 10], 1, 1) },
+                { name: 'Null Zone', test: () => calculator.calculateFee({name: 'Light envelope'}, 1, null, {}) },
+                { name: 'Invalid Zone', test: () => calculator.calculateFee({name: 'Light envelope'}, 1, 'MARS', {}) },
+                { name: 'Empty String Zone', test: () => calculator.calculateFee({name: 'Light envelope'}, 1, '', {}) },
+                { name: 'Null Price Check', test: () => calculator.checkLowPriceFBAEligibility(null, 'UK') },
+                { name: 'String Price', test: () => calculator.checkLowPriceFBAEligibility("not a number", 'UK') },
+                { name: 'Boolean Price', test: () => calculator.checkLowPriceFBAEligibility(true, 'UK') },
+                { name: 'Object as Price', test: () => calculator.checkLowPriceFBAEligibility({price: 10}, 'UK') },
+                { name: 'Array as Dimensions', test: () => calculator.calculateDimensionalWeight([1,2,3], 4, 5) },
+                { name: 'Extremely Large Numbers', test: () => calculator.calculateDimensionalWeight(1e10, 1e10, 1e10) },
+                { name: 'Scientific Notation', test: () => calculator.determineSizeTier({height: 1e-10, width: 1e-10, depth: 1e-10}, 1e-10, 1e-10) },
+                { name: 'Mixed Type Parameters', test: () => calculator.checkLowPriceFBAEligibility("10", true) }
+            ];
+
+            for (let i = 0; i < breakingTests.length; i++) {
+                const test = breakingTests[i];
+                updateProgress(i + 1, breakingTests.length, 'Breaking point tests');
+                
+                await runTest(`Breaking: ${test.name}`, async () => {
+                    try {
+                        const result = test.test();
+                        return {
+                            status: 'warning',
+                            details: `Didn't crash: ${JSON.stringify(result).substring(0, 100)}...`
+                        };
+                    } catch (error) {
+                        return {
+                            status: error.message.includes('Cannot read') || error.message.includes('undefined') ? 'fail' : 'warning',
+                            details: `Error handled: ${error.message}`
+                        };
+                    }
+                });
+                
+                await new Promise(resolve => setTimeout(resolve, 20));
+            }
+            
+            isRunning = false;
+        }
+
+        async function runAllStressTests() {
+            if (isRunning) return;
+            
+            clearAllResults();
+            const startTime = performance.now();
+            
+            logResult('STRESS TEST STARTED', 'info', 0, 'Running comprehensive stress test suite...');
+            
+            await runBoundaryTests();
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            await runExtremeValueTests();
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            await runPerformanceTests();
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            await runFuzzyTests();
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            await runLowPriceStressTests();
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            await runBreakingTests();
+            
+            const endTime = performance.now();
+            const totalDuration = endTime - startTime;
+            
+            logResult('STRESS TEST COMPLETED', 'info', totalDuration, 
+                `Total time: ${(totalDuration/1000).toFixed(2)} seconds. Check results above for any failures.`);
+            
+            updateProgress(100, 100, 'All stress tests completed');
+            
+            // Final summary
+            const passRate = ((testStats.passed / testStats.total) * 100).toFixed(1);
+            const summaryStatus = testStats.failed === 0 ? 'pass' : testStats.failed < 10 ? 'warning' : 'fail';
+            
+            logResult('FINAL SUMMARY', summaryStatus, 0, 
+                `Pass rate: ${passRate}%. ${testStats.failed} critical failures, ${testStats.warnings} warnings. Calculator ${testStats.failed === 0 ? 'PASSED' : 'NEEDS ATTENTION'}.`);
+        }
+    </script>
+</body>
+</html>

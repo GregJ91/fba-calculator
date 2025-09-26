@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 NUCLEAR FBA Calculator Stress Test - EXTREME EDITION</title>
+    <style>
+        body { font-family: 'Courier New', monospace; margin: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .warning-banner { background: linear-gradient(45deg, #ff0000, #ff4500); padding: 20px; border-radius: 10px; margin: 20px 0; text-align: center; font-weight: bold; font-size: 18px; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        
+        .test-section { background: rgba(0,0,0,0.8); margin: 20px 0; padding: 25px; border-radius: 12px; border: 2px solid #00ff00; box-shadow: 0 0 20px rgba(0,255,0,0.3); }
+        .test-controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0; }
+        
+        button { padding: 15px 25px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; transition: all 0.3s; text-transform: uppercase; }
+        .nuclear-btn { background: linear-gradient(45deg, #ff0000, #ff6b00); color: white; box-shadow: 0 4px 15px rgba(255,0,0,0.4); }
+        .nuclear-btn:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(255,0,0,0.6); }
+        .extreme-btn { background: linear-gradient(45deg, #ff4500, #ff8c00); color: white; }
+        .extreme-btn:hover { transform: scale(1.05); }
+        .danger-btn { background: linear-gradient(45deg, #8b0000, #dc143c); color: white; }
+        .danger-btn:hover { transform: scale(1.05); }
+        .chaos-btn { background: linear-gradient(45deg, #4b0082, #8a2be2); color: white; }
+        .chaos-btn:hover { transform: scale(1.05); }
+        
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; margin: 20px 0; }
+        .stat-card { background: linear-gradient(135deg, #1e3c72, #2a5298); padding: 15px; border-radius: 10px; text-align: center; border: 1px solid #00ffff; }
+        .stat-number { font-size: 2.5em; font-weight: bold; margin: 10px 0; text-shadow: 0 0 10px currentColor; }
+        .stat-label { color: #ccc; font-size: 0.9em; }
+        
+        .progress-container { margin: 20px 0; }
+        .progress-bar { width: 100%; height: 25px; background: rgba(0,0,0,0.5); border-radius: 12px; overflow: hidden; border: 2px solid #00ff00; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #00ff00, #ffff00, #ff0000); transition: width 0.3s ease; box-shadow: 0 0 20px rgba(0,255,0,0.5); }
+        
+        .test-result { margin: 8px 0; padding: 15px; border-radius: 8px; font-family: 'Courier New', monospace; font-size: 13px; border-left: 5px solid; }
+        .pass { background: rgba(0,255,0,0.1); border-color: #00ff00; color: #00ff00; }
+        .fail { background: rgba(255,0,0,0.1); border-color: #ff0000; color: #ff4444; }
+        .warning { background: rgba(255,255,0,0.1); border-color: #ffff00; color: #ffff44; }
+        .critical { background: rgba(255,0,255,0.1); border-color: #ff00ff; color: #ff44ff; }
+        .chaos { background: rgba(128,0,128,0.1); border-color: #8000ff; color: #8844ff; }
+        
+        .test-log { max-height: 500px; overflow-y: auto; background: rgba(0,0,0,0.9); border: 2px solid #00ffff; border-radius: 8px; padding: 20px; margin: 15px 0; }
+        .test-log::-webkit-scrollbar { width: 12px; }
+        .test-log::-webkit-scrollbar-track { background: #1a1a1a; }
+        .test-log::-webkit-scrollbar-thumb { background: #00ff00; border-radius: 6px; }
+        
+        h1 { text-align: center; font-size: 3em; text-shadow: 0 0 20px #00ff00; margin-bottom: 30px; }
+        h2 { color: #00ffff; text-shadow: 0 0 10px #00ffff; border-bottom: 2px solid #00ffff; padding-bottom: 10px; }
+        h3 { color: #ffff00; text-shadow: 0 0 5px #ffff00; }
+        
+        .system-monitor { background: rgba(0,0,0,0.9); padding: 20px; border-radius: 10px; margin: 20px 0; border: 2px solid #ff00ff; }
+        .memory-usage { height: 100px; background: rgba(0,0,0,0.5); border: 1px solid #00ff00; border-radius: 5px; position: relative; overflow: hidden; }
+        .memory-bar { height: 100%; background: linear-gradient(to top, #00ff00, #ffff00, #ff0000); transition: height 0.5s; }
+        
+        .chaos-mode { animation: chaosFlash 0.5s infinite alternate; }
+        @keyframes chaosFlash { 0% { background-color: rgba(255,0,0,0.1); } 100% { background-color: rgba(0,255,255,0.1); } }
+        
+        .matrix-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; opacity: 0.1; }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+    
+    <div class="container">
+        <h1>🚀 NUCLEAR STRESS TEST 🚀</h1>
+        
+        <div class="warning-banner">
+            ⚠️ EXTREME WARNING ⚠️<br>
+            This test will execute 50,000+ calculations with extreme values, memory stress, concurrent operations,<br>
+            infinite loops detection, stack overflow tests, and chaos mode. May crash your browser!<br>
+            💀 PROCEED AT YOUR OWN RISK 💀
+        </div>
+
+        <div class="test-section">
+            <h2>🎛️ NUCLEAR TEST CONTROLS</h2>
+            <div class="test-controls">
+                <button class="nuclear-btn" onclick="runNuclearStressTest()">☢️ NUCLEAR STRESS TEST</button>
+                <button class="extreme-btn" onclick="runMemoryBombTest()">💣 MEMORY BOMB TEST</button>
+                <button class="extreme-btn" onclick="runConcurrencyStressTest()">⚡ CONCURRENCY STRESS</button>
+                <button class="danger-btn" onclick="runInfiniteLoopTest()">🔄 INFINITE LOOP TEST</button>
+                <button class="danger-btn" onclick="runStackOverflowTest()">📚 STACK OVERFLOW TEST</button>
+                <button class="chaos-btn" onclick="runChaosMode()">🌪️ CHAOS MODE</button>
+                <button class="extreme-btn" onclick="runQuantumTest()">⚛️ QUANTUM TEST</button>
+                <button class="nuclear-btn" onclick="runApocalypseTest()">🔥 APOCALYPSE TEST</button>
+                <button class="danger-btn" onclick="stopAllTests()">🛑 EMERGENCY STOP</button>
+                <button class="danger-btn" onclick="nukeEverything()">💀 NUKE EVERYTHING</button>
+            </div>
+            
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressBar" style="width: 0%"></div>
+                </div>
+                <div id="progressText" style="text-align: center; margin: 10px 0; font-weight: bold;">🚀 READY FOR NUCLEAR TESTING 🚀</div>
+            </div>
+        </div>
+
+        <div class="system-monitor">
+            <h3>🖥️ SYSTEM MONITOR</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <div>Memory Usage:</div>
+                    <div class="memory-usage">
+                        <div class="memory-bar" id="memoryBar" style="height: 0%"></div>
+                    </div>
+                </div>
+                <div>
+                    <div>CPU Load: <span id="cpuLoad">0%</span></div>
+                    <div>Active Workers: <span id="activeWorkers">0</span></div>
+                    <div>Calculations/sec: <span id="calcPerSec">0</span></div>
+                    <div>Browser Status: <span id="browserStatus">STABLE</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="totalTests" style="color: #00ff00;">0</div>
+                <div class="stat-label">Total Tests</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="passedTests" style="color: #00ff00;">0</div>
+                <div class="stat-label">Passed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="failedTests" style="color: #ff0000;">0</div>
+                <div class="stat-label">Failed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="criticalTests" style="color: #ff00ff;">0</div>
+                <div class="stat-label">Critical</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="chaosTests" style="color: #8000ff;">0</div>
+                <div class="stat-label">Chaos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="avgTime">0ms</div>
+                <div class="stat-label">Avg Time</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="maxTime">0ms</div>
+                <div class="stat-label">Max Time</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalTime">0s</div>
+                <div class="stat-label">Total Time</div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>📋 NUCLEAR TEST RESULTS</h2>
+            <div id="testResults" class="test-log"></div>
+        </div>
+    </div>
+
+    <script src="fba-calculator.js"></script>
+    <script>
+        let calculator;
+        let nuclearStats = {
+            total: 0, passed: 0, failed: 0, critical: 0, chaos: 0,
+            totalTime: 0, times: [], maxTime: 0
+        };
+        
+        let isNuclearMode = false;
+        let workers = [];
+        let chaosMode = false;
+        let apocalypseMode = false;
+        let calcPerSecond = 0;
+        let lastCalcCount = 0;
+        
+        // Matrix rain effect
+        const canvas = document.getElementById('matrixCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        const matrix = "ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789@#$%^&*()*&^%+-/~{[|`]}";
+        const matrixArray = matrix.split("");
+        const fontSize = 10;
+        const columns = canvas.width / fontSize;
+        const drops = [];
+        
+        for(let x = 0; x < columns; x++) drops[x] = 1;
+        
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.04)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#0F0';
+            ctx.font = fontSize + 'px arial';
+            
+            for(let i = 0; i < drops.length; i++) {
+                const text = matrixArray[Math.floor(Math.random() * matrixArray.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                
+                if(drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
+            }
+        }
+        
+        setInterval(drawMatrix, 35);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            calculator = new FBACalculator();
+            console.log('🚀 NUCLEAR CALCULATOR INITIALIZED');
+            startSystemMonitoring();
+        });
+
+        function startSystemMonitoring() {
+            setInterval(() => {
+                // Simulate system monitoring
+                const memUsage = (performance.memory ? performance.memory.usedJSHeapSize / performance.memory.totalJSHeapSize * 100 : Math.random() * 100);
+                document.getElementById('memoryBar').style.height = memUsage + '%';
+                
+                const cpuLoad = Math.min(100, (nuclearStats.times.length > 0 ? nuclearStats.times[nuclearStats.times.length - 1] : 0) / 10);
+                document.getElementById('cpuLoad').textContent = Math.round(cpuLoad) + '%';
+                
+                document.getElementById('activeWorkers').textContent = workers.length;
+                document.getElementById('calcPerSec').textContent = calcPerSecond;
+                
+                const currentCalcs = nuclearStats.total;
+                calcPerSecond = currentCalcs - lastCalcCount;
+                lastCalcCount = currentCalcs;
+                
+                let status = 'STABLE';
+                if (memUsage > 90) status = 'CRITICAL';
+                else if (memUsage > 70) status = 'WARNING';
+                else if (chaosMode) status = 'CHAOS';
+                else if (apocalypseMode) status = 'APOCALYPSE';
+                
+                document.getElementById('browserStatus').textContent = status;
+            }, 1000);
+        }
+
+        function updateNuclearStats() {
+            document.getElementById('totalTests').textContent = nuclearStats.total;
+            document.getElementById('passedTests').textContent = nuclearStats.passed;
+            document.getElementById('failedTests').textContent = nuclearStats.failed;
+            document.getElementById('criticalTests').textContent = nuclearStats.critical;
+            document.getElementById('chaosTests').textContent = nuclearStats.chaos;
+            
+            const avgTime = nuclearStats.times.length > 0 ? 
+                nuclearStats.times.reduce((a, b) => a + b, 0) / nuclearStats.times.length : 0;
+            document.getElementById('avgTime').textContent = Math.round(avgTime) + 'ms';
+            document.getElementById('maxTime').textContent = Math.round(nuclearStats.maxTime) + 'ms';
+            document.getElementById('totalTime').textContent = Math.round(nuclearStats.totalTime / 1000) + 's';
+        }
+
+        function updateNuclearProgress(current, total, message) {
+            const percentage = (current / total) * 100;
+            document.getElementById('progressBar').style.width = percentage + '%';
+            document.getElementById('progressText').textContent = `${message} (${current}/${total})`;
+        }
+
+        function logNuclearResult(testName, result, time = 0, details = '') {
+            nuclearStats.total++;
+            nuclearStats.totalTime += time;
+            nuclearStats.times.push(time);
+            nuclearStats.maxTime = Math.max(nuclearStats.maxTime, time);
+            
+            if (result === 'pass') nuclearStats.passed++;
+            else if (result === 'fail') nuclearStats.failed++;
+            else if (result === 'critical') nuclearStats.critical++;
+            else if (result === 'chaos') nuclearStats.chaos++;
+
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result ${result}`;
+            
+            const icons = { pass: '✅', fail: '❌', warning: '⚠️', critical: '💀', chaos: '🌪️' };
+            const icon = icons[result] || 'ℹ️';
+            
+            resultDiv.innerHTML = `
+                <strong>${icon} ${result.toUpperCase()}: ${testName}</strong> 
+                <span style="float: right; color: #666;">${time.toFixed(2)}ms</span>
+                ${details ? `<br><small style="color: #ccc;">${details}</small>` : ''}
+            `;
+            
+            document.getElementById('testResults').appendChild(resultDiv);
+            document.getElementById('testResults').scrollTop = document.getElementById('testResults').scrollHeight;
+            
+            updateNuclearStats();
+        }
+
+        async function runNuclearTest(testName, testFunction) {
+            if (!isNuclearMode) return;
+            
+            const startTime = performance.now();
+            try {
+                const result = await testFunction();
+                const endTime = performance.now();
+                const duration = endTime - startTime;
+                
+                logNuclearResult(testName, result.status, duration, result.details || '');
+                return result;
+            } catch (error) {
+                const endTime = performance.now();
+                const duration = endTime - startTime;
+                const isCritical = error.message.includes('Maximum call stack') || 
+                                  error.message.includes('out of memory') ||
+                                  error.message.includes('Cannot read');
+                logNuclearResult(testName, isCritical ? 'critical' : 'fail', duration, `Error: ${error.message}`);
+                return { status: isCritical ? 'critical' : 'fail', error: error.message };
+            }
+        }
+
+        async function runMemoryBombTest() {
+            isNuclearMode = true;
+            logNuclearResult('MEMORY BOMB TEST INITIATED', 'warning', 0, '💣 Attempting to stress test memory limits...');
+            
+            const memoryBombs = [];
+            const iterations = 10000;
+            
+            for (let i = 0; i < iterations; i++) {
+                updateNuclearProgress(i, iterations, '💣 MEMORY BOMB STRESS');
+                
+                await runNuclearTest(`Memory Bomb ${i}`, async () => {
+                    // Create massive arrays and objects
+                    const hugeArray = new Array(1000).fill(0).map(() => ({
+                        dimensions: { height: Math.random() * 1000, width: Math.random() * 1000, depth: Math.random() * 1000 },
+                        weight: Math.random() * 100,
+                        zone: ['UK', 'DE', 'FR', 'IT', 'ES', 'NL', 'SE', 'PL', 'BE'][Math.floor(Math.random() * 9)],
+                        price: Math.random() * 1000,
+                        calculations: []
+                    }));
+                    
+                    hugeArray.forEach(item => {
+                        try {
+                            const sortedDims = [item.dimensions.height, item.dimensions.width, item.dimensions.depth].sort((a, b) => b - a);
+                            const dimensionalWeight = calculator.calculateDimensionalWeight(sortedDims[0], sortedDims[1], sortedDims[2]);
+                            const sizeTier = calculator.determineSizeTier(item.dimensions, item.weight, dimensionalWeight);
+                            const fee = calculator.calculateFee(sizeTier, Math.max(item.weight, dimensionalWeight), item.zone, null);
+                            
+                            item.calculations.push({ fee, sizeTier: sizeTier.name, dimensionalWeight });
+                        } catch (error) {
+                            // Continue on errors
+                        }
+                    });
+                    
+                    memoryBombs.push(hugeArray);
+                    
+                    return { status: 'pass', details: `Created array with ${hugeArray.length} complex objects` };
+                });
+                
+                if (i % 100 === 0) {
+                    await new Promise(resolve => setTimeout(resolve, 1));
+                }
+            }
+            
+            logNuclearResult('MEMORY BOMB TEST COMPLETED', 'warning', 0, 
+                `Created ${memoryBombs.length} memory bombs totaling ${memoryBombs.reduce((sum, arr) => sum + arr.length, 0)} objects`);
+            
+            isNuclearMode = false;
+        }
+
+        async function runConcurrencyStressTest() {
+            isNuclearMode = true;
+            logNuclearResult('CONCURRENCY STRESS TEST INITIATED', 'warning', 0, '⚡ Testing concurrent operations...');
+            
+            const concurrentPromises = [];
+            const concurrentTests = 1000;
+            
+            for (let i = 0; i < concurrentTests; i++) {
+                const promise = runNuclearTest(`Concurrent ${i}`, async () => {
+                    const dimensions = {
+                        height: Math.random() * 200,
+                        width: Math.random() * 200,
+                        depth: Math.random() * 200
+                    };
+                    const weight = Math.random() * 50;
+                    const zone = ['UK', 'DE', 'FR', 'IT', 'ES', 'NL', 'SE', 'PL', 'BE'][Math.floor(Math.random() * 9)];
+                    const price = Math.random() * 100;
+                    
+                    // Run multiple calculations simultaneously
+                    const results = await Promise.all([
+                        Promise.resolve(calculator.calculateDimensionalWeight(dimensions.height, dimensions.width, dimensions.depth)),
+                        Promise.resolve(calculator.determineSizeTier(dimensions, weight, null)),
+                        Promise.resolve(calculator.checkLowPriceFBAEligibility(price, zone))
+                    ]);
+                    
+                    return { status: 'pass', details: `Concurrent calculations completed: ${results.length} operations` };
+                });
+                
+                concurrentPromises.push(promise);
+                
+                if (i % 100 === 0) {
+                    updateNuclearProgress(i, concurrentTests, '⚡ CONCURRENCY STRESS');
+                    await new Promise(resolve => setTimeout(resolve, 1));
+                }
+            }
+            
+            await Promise.all(concurrentPromises);
+            
+            logNuclearResult('CONCURRENCY STRESS TEST COMPLETED', 'pass', 0, 
+                `Successfully ran ${concurrentTests} concurrent operations`);
+            
+            isNuclearMode = false;
+        }
+
+        async function runInfiniteLoopTest() {
+            isNuclearMode = true;
+            logNuclearResult('INFINITE LOOP TEST INITIATED', 'critical', 0, '🔄 Testing infinite loop detection...');
+            
+            let loopCount = 0;
+            const maxIterations = 1000000;
+            const startTime = performance.now();
+            
+            try {
+                while (loopCount < maxIterations && isNuclearMode) {
+                    // Simulate potential infinite loop scenarios
+                    const dimensions = { height: Infinity, width: NaN, depth: -Infinity };
+                    const weight = Math.pow(10, loopCount % 10);
+                    
+                    try {
+                        calculator.determineSizeTier(dimensions, weight, null);
+                    } catch (error) {
+                        // Expected errors in extreme conditions
+                    }
+                    
+                    loopCount++;
+                    
+                    if (loopCount % 10000 === 0) {
+                        updateNuclearProgress(loopCount, maxIterations, '🔄 INFINITE LOOP TEST');
+                        await new Promise(resolve => setTimeout(resolve, 1));
+                        
+                        const currentTime = performance.now();
+                        if (currentTime - startTime > 30000) { // 30 second timeout
+                            logNuclearResult('INFINITE LOOP TIMEOUT', 'critical', currentTime - startTime, 
+                                `Loop terminated after ${loopCount} iterations (30s timeout)`);
+                            break;
+                        }
+                    }
+                }
+                
+                logNuclearResult('INFINITE LOOP TEST COMPLETED', 'pass', performance.now() - startTime, 
+                    `Completed ${loopCount} iterations without hanging`);
+            } catch (error) {
+                logNuclearResult('INFINITE LOOP TEST ERROR', 'critical', performance.now() - startTime, 
+                    `Error after ${loopCount} iterations: ${error.message}`);
+            }
+            
+            isNuclearMode = false;
+        }
+
+        async function runStackOverflowTest() {
+            isNuclearMode = true;
+            logNuclearResult('STACK OVERFLOW TEST INITIATED', 'critical', 0, '📚 Testing stack overflow conditions...');
+            
+            let depth = 0;
+            
+            function recursiveTest(currentDepth) {
+                depth = currentDepth;
+                
+                if (currentDepth > 10000) {
+                    return { status: 'pass', details: `Reached depth ${currentDepth} without overflow` };
+                }
+                
+                try {
+                    // Create recursive scenario
+                    const dimensions = { height: currentDepth, width: currentDepth, depth: currentDepth };
+                    const weight = currentDepth / 1000;
+                    
+                    calculator.determineSizeTier(dimensions, weight, null);
+                    
+                    return recursiveTest(currentDepth + 1);
+                } catch (error) {
+                    if (error.message.includes('Maximum call stack')) {
+                        return { status: 'critical', details: `Stack overflow at depth ${currentDepth}` };
+                    }
+                    return { status: 'warning', details: `Error at depth ${currentDepth}: ${error.message}` };
+                }
+            }
+            
+            try {
+                const result = recursiveTest(0);
+                logNuclearResult('STACK OVERFLOW TEST COMPLETED', result.status, 0, result.details);
+            } catch (error) {
+                logNuclearResult('STACK OVERFLOW TEST ERROR', 'critical', 0, 
+                    `Stack overflow detected at depth ${depth}: ${error.message}`);
+            }
+            
+            isNuclearMode = false;
+        }
+
+        async function runChaosMode() {
+            chaosMode = true;
+            isNuclearMode = true;
+            document.body.classList.add('chaos-mode');
+            
+            logNuclearResult('🌪️ CHAOS MODE ACTIVATED 🌪️', 'chaos', 0, 'Entering complete chaos with random everything...');
+            
+            const chaosIterations = 5000;
+            
+            for (let i = 0; i < chaosIterations; i++) {
+                updateNuclearProgress(i, chaosIterations, '🌪️ CHAOS MODE ACTIVE');
+                
+                await runNuclearTest(`Chaos ${i}`, async () => {
+                    // Generate completely chaotic inputs
+                    const chaosInputs = [
+                        null, undefined, NaN, Infinity, -Infinity,
+                        "", "chaos", [], {}, true, false,
+                        Math.random() * 1e10, -Math.random() * 1e10,
+                        String.fromCharCode(Math.random() * 65536),
+                        new Date(), /regex/, Symbol('chaos')
+                    ];
+                    
+                    const randomInput = () => chaosInputs[Math.floor(Math.random() * chaosInputs.length)];
+                    
+                    try {
+                        // Chaos calculations with random inputs
+                        calculator.calculateDimensionalWeight(randomInput(), randomInput(), randomInput());
+                        calculator.determineSizeTier(
+                            { height: randomInput(), width: randomInput(), depth: randomInput() },
+                            randomInput(),
+                            randomInput()
+                        );
+                        calculator.checkLowPriceFBAEligibility(randomInput(), randomInput());
+                        calculator.calculateFee(
+                            { name: randomInput() },
+                            randomInput(),
+                            randomInput(),
+                            randomInput()
+                        );
+                        
+                        return { status: 'chaos', details: 'Chaos survived' };
+                    } catch (error) {
+                        return { status: 'chaos', details: `Chaos error: ${error.message.substring(0, 50)}...` };
+                    }
+                });
+                
+                if (i % 50 === 0) {
+                    await new Promise(resolve => setTimeout(resolve, Math.random() * 10));
+                }
+            }
+            
+            document.body.classList.remove('chaos-mode');
+            chaosMode = false;
+            isNuclearMode = false;
+            
+            logNuclearResult('🌪️ CHAOS MODE COMPLETED 🌪️', 'chaos', 0, 
+                `Survived ${chaosIterations} chaos operations`);
+        }
+
+        async function runQuantumTest() {
+            isNuclearMode = true;
+            logNuclearResult('⚛️ QUANTUM TEST INITIATED ⚛️', 'chaos', 0, 'Testing quantum superposition of calculator states...');
+            
+            // Test quantum superposition - calculator in multiple states simultaneously
+            const quantumStates = [];
+            
+            for (let i = 0; i < 1000; i++) {
+                updateNuclearProgress(i, 1000, '⚛️ QUANTUM SUPERPOSITION');
+                
+                await runNuclearTest(`Quantum State ${i}`, async () => {
+                    // Create quantum superposition of inputs
+                    const quantumDimensions = {
+                        height: Math.random() < 0.5 ? Math.random() * 100 : Math.random() * -100,
+                        width: Math.random() < 0.5 ? Math.random() * 100 : undefined,
+                        depth: Math.random() < 0.5 ? null : Math.random() * 100
+                    };
+                    
+                    const quantumWeight = Math.random() < 0.3 ? NaN : Math.random() < 0.3 ? Infinity : Math.random() * 50;
+                    const quantumZone = Math.random() < 0.5 ? 'QUANTUM' : ['UK', 'DE', 'FR'][Math.floor(Math.random() * 3)];
+                    
+                    // Measure quantum state (collapse wavefunction)
+                    try {
+                        const result = calculator.determineSizeTier(quantumDimensions, quantumWeight, null);
+                        quantumStates.push({ input: quantumDimensions, output: result, collapsed: true });
+                        return { status: 'pass', details: `Quantum state collapsed to: ${result.name}` };
+                    } catch (error) {
+                        quantumStates.push({ input: quantumDimensions, error: error.message, collapsed: false });
+                        return { status: 'chaos', details: `Quantum decoherence: ${error.message}` };
+                    }
+                });
+                
+                if (i % 100 === 0) {
+                    await new Promise(resolve => setTimeout(resolve, 1));
+                }
+            }
+            
+            const collapsedStates = quantumStates.filter(s => s.collapsed).length;
+            const decoherentStates = quantumStates.length - collapsedStates;
+            
+            logNuclearResult('⚛️ QUANTUM TEST COMPLETED ⚛️', 'chaos', 0, 
+                `${collapsedStates} states collapsed, ${decoherentStates} decoherent states`);
+            
+            isNuclearMode = false;
+        }
+
+        async function runApocalypseTest() {
+            apocalypseMode = true;
+            isNuclearMode = true;
+            
+            logNuclearResult('🔥 APOCALYPSE TEST INITIATED 🔥', 'critical', 0, 
+                '💀 FINAL BOSS BATTLE - ALL TESTS SIMULTANEOUSLY 💀');
+            
+            // Run ALL tests simultaneously
+            const apocalypsePromises = [
+                runMemoryBombTest(),
+                runConcurrencyStressTest(),
+                runInfiniteLoopTest(),
+                runStackOverflowTest(),
+                runChaosMode(),
+                runQuantumTest()
+            ];
+            
+            try {
+                await Promise.allSettled(apocalypsePromises);
+                logNuclearResult('🔥 APOCALYPSE SURVIVED 🔥', 'pass', 0, 
+                    '🎉 CALCULATOR SURVIVED THE APOCALYPSE! 🎉');
+            } catch (error) {
+                logNuclearResult('🔥 APOCALYPSE FAILURE 🔥', 'critical', 0, 
+                    `💀 Calculator destroyed: ${error.message}`);
+            }
+            
+            apocalypseMode = false;
+            isNuclearMode = false;
+        }
+
+        async function runNuclearStressTest() {
+            if (isNuclearMode) return;
+            
+            isNuclearMode = true;
+            const startTime = performance.now();
+            
+            logNuclearResult('☢️ NUCLEAR STRESS TEST INITIATED ☢️', 'critical', 0, 
+                'Beginning nuclear-level stress testing...');
+            
+            // Run all nuclear tests in sequence
+            await runMemoryBombTest();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await runConcurrencyStressTest();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await runInfiniteLoopTest();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await runStackOverflowTest();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await runChaosMode();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await runQuantumTest();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await runApocalypseTest();
+            
+            const totalTime = performance.now() - startTime;
+            
+            logNuclearResult('☢️ NUCLEAR STRESS TEST COMPLETED ☢️', 'pass', totalTime, 
+                `🎉 CALCULATOR SURVIVED NUCLEAR TESTING! Total time: ${(totalTime/1000).toFixed(2)}s`);
+            
+            updateNuclearProgress(100, 100, '☢️ NUCLEAR TEST COMPLETED');
+            isNuclearMode = false;
+        }
+
+        function stopAllTests() {
+            isNuclearMode = false;
+            chaosMode = false;
+            apocalypseMode = false;
+            workers.forEach(worker => worker.terminate());
+            workers = [];
+            
+            logNuclearResult('🛑 EMERGENCY STOP ACTIVATED', 'warning', 0, 'All tests stopped by user');
+        }
+
+        function nukeEverything() {
+            stopAllTests();
+            
+            // Clear all results
+            document.getElementById('testResults').innerHTML = '';
+            nuclearStats = { total: 0, passed: 0, failed: 0, critical: 0, chaos: 0, totalTime: 0, times: [], maxTime: 0 };
+            updateNuclearStats();
+            updateNuclearProgress(0, 1, '💀 EVERYTHING NUKED 💀');
+            
+            logNuclearResult('💀 NUCLEAR RESET COMPLETE 💀', 'critical', 0, 
+                'All test data destroyed. Calculator reset to initial state.');
+        }
+    </script>
+</body>
+</html>

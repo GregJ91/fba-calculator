@@ -3,113 +3,256 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple FBA Test</title>
+    <title>Low-Price FBA Quick Test</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-        .test { margin: 20px 0; padding: 15px; border-radius: 5px; }
-        .pass { background-color: #e8f5e8; border: 1px solid #4caf50; }
-        .fail { background-color: #ffeaea; border: 1px solid #f44336; }
-        .result { font-weight: bold; margin-top: 10px; }
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .test-container { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 4px; font-family: monospace; }
+        .pass { background: #d4edda; border-left: 4px solid #28a745; }
+        .fail { background: #f8d7da; border-left: 4px solid #dc3545; }
+        .info { background: #d1ecf1; border-left: 4px solid #17a2b8; }
+        button { padding: 12px 24px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin: 10px 5px; }
+        button:hover { background: #0056b3; }
+        .summary { font-size: 18px; font-weight: bold; margin: 20px 0; padding: 15px; border-radius: 4px; }
+        .manual-test { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 4px; margin: 10px 0; }
     </style>
-    <script src="fba-calculator.js?v=20250812"></script>
 </head>
 <body>
-    <h1>🧪 Simple FBA Calculator Test</h1>
-    <div id="results"></div>
+    <h1>🧪 Low-Price FBA Critical Tests</h1>
     
+    <div class="test-container">
+        <h2>🚀 Automated Tests</h2>
+        <button onclick="runAutomatedTests()">Run All Automated Tests</button>
+        <div id="automatedResults"></div>
+    </div>
+
+    <div class="test-container">
+        <h2>🖱️ Manual Test Cases</h2>
+        <p>Use these test cases in the main calculator to verify functionality:</p>
+        
+        <div class="manual-test">
+            <h3>Test 1: UK Low-Price FBA Eligible</h3>
+            <ul>
+                <li><strong>Dimensions:</strong> 15 x 10 x 1 cm</li>
+                <li><strong>Weight:</strong> 50g</li>
+                <li><strong>Product Price:</strong> £8.00</li>
+                <li><strong>Zone:</strong> UK</li>
+                <li><strong>Expected:</strong> ✅ Eligible, Low-Price Fee: £1.52, Savings shown</li>
+            </ul>
+            <button onclick="testCase1()">Test This Case</button>
+        </div>
+
+        <div class="manual-test">
+            <h3>Test 2: UK Not Eligible (Price Too High)</h3>
+            <ul>
+                <li><strong>Dimensions:</strong> 15 x 10 x 1 cm</li>
+                <li><strong>Weight:</strong> 50g</li>
+                <li><strong>Product Price:</strong> £15.00</li>
+                <li><strong>Zone:</strong> UK</li>
+                <li><strong>Expected:</strong> ❌ Not eligible (price above threshold)</li>
+            </ul>
+            <button onclick="testCase2()">Test This Case</button>
+        </div>
+
+        <div class="manual-test">
+            <h3>Test 3: Germany Standard Envelope</h3>
+            <ul>
+                <li><strong>Dimensions:</strong> 30 x 20 x 2 cm</li>
+                <li><strong>Weight:</strong> 210g</li>
+                <li><strong>Product Price:</strong> €10.00</li>
+                <li><strong>Zone:</strong> DE</li>
+                <li><strong>Expected:</strong> ✅ Eligible, Low-Price Fee: €2.12</li>
+            </ul>
+            <button onclick="testCase3()">Test This Case</button>
+        </div>
+
+        <div class="manual-test">
+            <h3>Test 4: Sweden High Threshold</h3>
+            <ul>
+                <li><strong>Dimensions:</strong> 25 x 15 x 8 cm</li>
+                <li><strong>Weight:</strong> 150g</li>
+                <li><strong>Product Price:</strong> 120.00 SEK</li>
+                <li><strong>Zone:</strong> SE</li>
+                <li><strong>Expected:</strong> ✅ Eligible, Low-Price Fee: 41.23 SEK</li>
+            </ul>
+            <button onclick="testCase4()">Test This Case</button>
+        </div>
+
+        <div class="manual-test">
+            <h3>Test 5: Large Product (No Low-Price Rate)</h3>
+            <ul>
+                <li><strong>Dimensions:</strong> 40 x 30 x 20 cm</li>
+                <li><strong>Weight:</strong> 2kg</li>
+                <li><strong>Product Price:</strong> £8.00</li>
+                <li><strong>Zone:</strong> UK</li>
+                <li><strong>Expected:</strong> ✅ Eligible but "Low-Price FBA rates not available for this category"</li>
+            </ul>
+            <button onclick="testCase5()">Test This Case</button>
+        </div>
+    </div>
+
+    <div id="summary" class="summary"></div>
+
+    <script src="fba-calculator.js"></script>
     <script>
+        let calculator;
+        let testResults = [];
+
         document.addEventListener('DOMContentLoaded', () => {
-            try {
-                console.log('Creating calculator...');
-                const calculator = new FBACalculator();
-                console.log('Calculator created successfully!');
-                
-                const tests = [
-                    {
-                        name: "Small envelope (50g)",
-                        dimensions: { height: 15, width: 10, depth: 0.8 },
-                        weight: 0.05,
-                        expected: "Small envelope"
-                    },
-                    {
-                        name: "Small parcel (2.5kg)",
-                        dimensions: { height: 30, width: 20, depth: 10 },
-                        weight: 2.5,
-                        expected: "Small parcel"
-                    },
-                    {
-                        name: "Overweight small parcel → Standard parcel",
-                        dimensions: { height: 30, width: 20, depth: 10 },
-                        weight: 4.5,
-                        expected: "Standard parcel"
-                    },
-                    {
-                        name: "Standard envelope (updated dimensions)",
-                        dimensions: { height: 30, width: 20, depth: 2 },
-                        weight: 0.3,
-                        expected: "Standard envelope"
-                    },
-                    {
-                        name: "Small oversize with surcharge",
-                        dimensions: { height: 50, width: 40, depth: 30 },
-                        weight: 2.5,
-                        expected: "Small oversize"
-                    }
-                ];
-                
-                let html = '';
-                let passed = 0;
-                
-                tests.forEach((test, index) => {
-                    const { height, width, depth } = test.dimensions;
-                    const sortedDims = [height, width, depth].sort((a, b) => b - a);
-                    const dimensionalWeight = calculator.calculateDimensionalWeight(sortedDims[0], sortedDims[1], sortedDims[2]);
-                    
-                    const tier = calculator.determineSizeTier(test.dimensions, test.weight, dimensionalWeight);
-                    const weightBracket = calculator.findWeightBracket(tier, test.weight);
-                    const fee = calculator.calculateFee(tier, test.weight, 'UK', weightBracket);
-                    
-                    const success = tier.name === test.expected;
-                    if (success) passed++;
-                    
-                    const cssClass = success ? 'pass' : 'fail';
-                    const icon = success ? '✅' : '❌';
-                    
-                    html += `
-                        <div class="test ${cssClass}">
-                            <h3>${icon} Test ${index + 1}: ${test.name}</h3>
-                            <p><strong>Dimensions:</strong> ${test.dimensions.height} × ${test.dimensions.width} × ${test.dimensions.depth} cm</p>
-                            <p><strong>Weight:</strong> ${test.weight} kg</p>
-                            <p><strong>Dimensional Weight:</strong> ${dimensionalWeight.toFixed(3)} kg</p>
-                            <p><strong>Expected:</strong> ${test.expected}</p>
-                            <p><strong>Actual:</strong> ${tier.name}</p>
-                            <p><strong>Weight Bracket:</strong> ${weightBracket.description}</p>
-                            <p><strong>UK Fee:</strong> ${fee}</p>
-                            <div class="result">${success ? 'PASS' : 'FAIL'}</div>
-                        </div>
-                    `;
-                });
-                
-                html = `
-                    <div style="text-align: center; margin: 20px 0; padding: 20px; background: #f0f0f0; border-radius: 8px;">
-                        <h2>${passed === tests.length ? '🎉 ALL TESTS PASSED!' : '⚠️ SOME TESTS FAILED'}</h2>
-                        <p><strong>Pass Rate:</strong> ${passed}/${tests.length} (${((passed/tests.length)*100).toFixed(1)}%)</p>
-                    </div>
-                ` + html;
-                
-                document.getElementById('results').innerHTML = html;
-                
-            } catch (error) {
-                document.getElementById('results').innerHTML = `
-                    <div class="test fail">
-                        <h3>❌ Error</h3>
-                        <p><strong>Error:</strong> ${error.message}</p>
-                        <p><strong>Stack:</strong> ${error.stack}</p>
-                    </div>
-                `;
-                console.error('Test failed:', error);
-            }
+            calculator = new FBACalculator();
+            console.log('Calculator initialized for testing');
         });
+
+        function logResult(testName, passed, expected, actual, details = '') {
+            const result = { testName, passed, expected, actual, details };
+            testResults.push(result);
+            
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result ${passed ? 'pass' : 'fail'}`;
+            resultDiv.innerHTML = `
+                <strong>${passed ? '✅ PASS' : '❌ FAIL'}: ${testName}</strong><br>
+                Expected: ${expected}<br>
+                Got: ${actual}
+                ${details ? `<br>Details: ${details}` : ''}
+            `;
+            
+            document.getElementById('automatedResults').appendChild(resultDiv);
+        }
+
+        function runAutomatedTests() {
+            document.getElementById('automatedResults').innerHTML = '';
+            testResults = [];
+            
+            console.log('Running automated tests...');
+
+            // Test 1: Price Threshold Detection
+            try {
+                const ukEligible = calculator.checkLowPriceFBAEligibility(8.00, 'UK');
+                logResult('UK Price Threshold - Eligible', ukEligible === true, 'true', ukEligible.toString(), '£8 ≤ £10');
+
+                const ukNotEligible = calculator.checkLowPriceFBAEligibility(12.00, 'UK');
+                logResult('UK Price Threshold - Not Eligible', ukNotEligible === false, 'false', ukNotEligible.toString(), '£12 > £10');
+
+                const deEligible = calculator.checkLowPriceFBAEligibility(11.00, 'DE');
+                logResult('DE Price Threshold - At Threshold', deEligible === true, 'true', deEligible.toString(), '€11 = €11');
+
+                const seEligible = calculator.checkLowPriceFBAEligibility(139.00, 'SE');
+                logResult('SE Price Threshold - Below High Threshold', seEligible === true, 'true', seEligible.toString(), '139 SEK < 140 SEK');
+            } catch (error) {
+                logResult('Price Threshold Tests', false, 'No error', `Error: ${error.message}`);
+            }
+
+            // Test 2: Fee Calculations
+            try {
+                // UK Light Envelope Test
+                const dimensions1 = { height: 15, width: 10, depth: 1 };
+                const weight1 = 0.02;
+                const zone1 = 'UK';
+                
+                const sortedDims1 = [dimensions1.height, dimensions1.width, dimensions1.depth].sort((a, b) => b - a);
+                const dimensionalWeight1 = calculator.calculateDimensionalWeight(sortedDims1[0], sortedDims1[1], sortedDims1[2]);
+                const sizeTier1 = calculator.determineSizeTier(dimensions1, weight1, dimensionalWeight1);
+                const pricingWeight1 = Math.max(weight1, dimensionalWeight1);
+                const weightBracket1 = calculator.findWeightBracket(sizeTier1, pricingWeight1);
+                
+                const lowPriceFee1 = calculator.calculateLowPriceFBAFee(sizeTier1, pricingWeight1, zone1, weightBracket1);
+                logResult('UK Light Envelope 20g Fee', lowPriceFee1 === '£1.46', '£1.46', lowPriceFee1, `Size: ${sizeTier1.name}`);
+
+                // DE Standard Envelope Test
+                const dimensions2 = { height: 30, width: 20, depth: 2 };
+                const weight2 = 0.21;
+                const zone2 = 'DE';
+                
+                const sortedDims2 = [dimensions2.height, dimensions2.width, dimensions2.depth].sort((a, b) => b - a);
+                const dimensionalWeight2 = calculator.calculateDimensionalWeight(sortedDims2[0], sortedDims2[1], sortedDims2[2]);
+                const sizeTier2 = calculator.determineSizeTier(dimensions2, weight2, dimensionalWeight2);
+                const pricingWeight2 = Math.max(weight2, dimensionalWeight2);
+                const weightBracket2 = calculator.findWeightBracket(sizeTier2, pricingWeight2);
+                
+                const lowPriceFee2 = calculator.calculateLowPriceFBAFee(sizeTier2, pricingWeight2, zone2, weightBracket2);
+                logResult('DE Standard Envelope 210g Fee', lowPriceFee2 === '€2.12', '€2.12', lowPriceFee2, `Size: ${sizeTier2.name}`);
+
+            } catch (error) {
+                logResult('Fee Calculation Tests', false, 'No error', `Error: ${error.message}`);
+            }
+
+            // Test 3: Currency Formatting
+            try {
+                const dimensions3 = { height: 15, width: 10, depth: 1 };
+                const weight3 = 0.02;
+                
+                const sortedDims3 = [dimensions3.height, dimensions3.width, dimensions3.depth].sort((a, b) => b - a);
+                const dimensionalWeight3 = calculator.calculateDimensionalWeight(sortedDims3[0], sortedDims3[1], sortedDims3[2]);
+                const sizeTier3 = calculator.determineSizeTier(dimensions3, weight3, dimensionalWeight3);
+                const pricingWeight3 = Math.max(weight3, dimensionalWeight3);
+                const weightBracket3 = calculator.findWeightBracket(sizeTier3, pricingWeight3);
+                
+                const plnFee = calculator.calculateLowPriceFBAFee(sizeTier3, pricingWeight3, 'PL', weightBracket3);
+                logResult('PLN Currency Format', plnFee.endsWith(' PLN'), 'Ends with " PLN"', plnFee, 'Poland uses suffix');
+
+                const sekFee = calculator.calculateLowPriceFBAFee(sizeTier3, pricingWeight3, 'SE', weightBracket3);
+                logResult('SEK Currency Format', sekFee.endsWith(' SEK'), 'Ends with " SEK"', sekFee, 'Sweden uses suffix');
+
+                const eurFee = calculator.calculateLowPriceFBAFee(sizeTier3, pricingWeight3, 'DE', weightBracket3);
+                logResult('EUR Currency Format', eurFee.startsWith('€'), 'Starts with "€"', eurFee, 'Germany uses prefix');
+
+            } catch (error) {
+                logResult('Currency Format Tests', false, 'No error', `Error: ${error.message}`);
+            }
+
+            // Test 4: Edge Cases
+            try {
+                const zeroPrice = calculator.checkLowPriceFBAEligibility(0, 'UK');
+                logResult('Zero Price Edge Case', zeroPrice === false, 'false', zeroPrice.toString(), 'Zero should not qualify');
+
+                const invalidZone = calculator.checkLowPriceFBAEligibility(5.00, 'INVALID');
+                logResult('Invalid Zone Edge Case', invalidZone === false, 'false', invalidZone.toString(), 'Invalid zones should not qualify');
+
+                const belgiumDate = calculator.checkLowPriceFBAEligibility(10.00, 'BE');
+                const currentDate = new Date();
+                const belgiumLaunchDate = new Date('2025-02-11');
+                const expectedBelgium = currentDate >= belgiumLaunchDate;
+                logResult('Belgium Launch Date', belgiumDate === expectedBelgium, expectedBelgium.toString(), belgiumDate.toString(), 
+                    `Current: ${currentDate.toDateString()}, Launch: Feb 11, 2025`);
+
+            } catch (error) {
+                logResult('Edge Case Tests', false, 'No error', `Error: ${error.message}`);
+            }
+
+            // Update Summary
+            const totalTests = testResults.length;
+            const passedTests = testResults.filter(r => r.passed).length;
+            const failedTests = totalTests - passedTests;
+            const percentage = totalTests > 0 ? ((passedTests / totalTests) * 100).toFixed(1) : 0;
+
+            const summaryDiv = document.getElementById('summary');
+            summaryDiv.innerHTML = `
+                📊 <strong>Test Summary:</strong> ${passedTests}/${totalTests} passed (${percentage}%)<br>
+                ${failedTests === 0 ? '🎉 All automated tests passed!' : `⚠️ ${failedTests} test(s) failed - check results above`}
+            `;
+            summaryDiv.className = `summary ${failedTests === 0 ? 'pass' : 'fail'}`;
+        }
+
+        // Manual test case functions
+        function testCase1() {
+            alert('Test Case 1: Open the main calculator and enter:\n• Dimensions: 15 x 10 x 1 cm\n• Weight: 50g\n• Product Price: £8.00\n• Zone: UK\n\nExpected: ✅ Eligible with Low-Price Fee £1.52');
+        }
+
+        function testCase2() {
+            alert('Test Case 2: Open the main calculator and enter:\n• Dimensions: 15 x 10 x 1 cm\n• Weight: 50g\n• Product Price: £15.00\n• Zone: UK\n\nExpected: ❌ Not eligible (price above threshold)');
+        }
+
+        function testCase3() {
+            alert('Test Case 3: Open the main calculator and enter:\n• Dimensions: 30 x 20 x 2 cm\n• Weight: 210g\n• Product Price: €10.00\n• Zone: DE\n\nExpected: ✅ Eligible with Low-Price Fee €2.12');
+        }
+
+        function testCase4() {
+            alert('Test Case 4: Open the main calculator and enter:\n• Dimensions: 25 x 15 x 8 cm\n• Weight: 150g\n• Product Price: 120.00 SEK\n• Zone: SE\n\nExpected: ✅ Eligible with Low-Price Fee 41.23 SEK');
+        }
+
+        function testCase5() {
+            alert('Test Case 5: Open the main calculator and enter:\n• Dimensions: 40 x 30 x 20 cm\n• Weight: 2kg\n• Product Price: £8.00\n• Zone: UK\n\nExpected: ✅ Price qualifies but "Low-Price FBA rates not available for this category"');
+        }
     </script>
 </body>
-</html> 
+</html>

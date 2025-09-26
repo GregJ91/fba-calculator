@@ -242,6 +242,126 @@ const ADDITIONAL_CHARGES = {
     'Heavy oversize': { UK: 0.09, DE: 0.15, FR: 0.15, IT: 0.18, ES: 0.15, NL: 0.12, SE: 9.49, PL: 0.39, BE: 0.68 }
 };
 
+// Low-Price FBA price thresholds by country
+const LOW_PRICE_FBA_THRESHOLDS = {
+    'UK': 10.00,
+    'DE': 11.00,
+    'FR': 12.00,
+    'IT': 12.00,
+    'ES': 12.00,
+    'NL': 12.00,
+    'SE': 140.00,
+    'PL': 55.00,
+    'BE': 12.00 // Available from February 11, 2025
+};
+
+// Low-Price FBA fees structure - Updated rates effective with new announcement
+const LOW_PRICE_FBA_FEES = {
+    'UK': {
+        'Light envelope': { 0.02: 1.46, 0.04: 1.50, 0.06: 1.52, 0.08: 1.67, 0.1: 1.70 },
+        'Standard envelope': { 0.21: 1.73, 0.46: 1.87 },
+        'Large envelope': { 0.96: 2.42 },
+        'Extra-large envelope': { 0.96: 2.65 },
+        'Small parcel': { 0.15: 2.67, 0.4: 2.70 }
+    },
+    'DE': {
+        'Light envelope': { 0.02: 1.87, 0.04: 1.90, 0.06: 1.92, 0.08: 2.06, 0.1: 2.09 },
+        'Standard envelope': { 0.21: 2.12, 0.46: 2.28 },
+        'Large envelope': { 0.96: 2.65 },
+        'Extra-large envelope': { 0.96: 3.04 },
+        'Small parcel': { 0.15: 3.04, 0.4: 3.25 }
+    },
+    'FR': {
+        'Light envelope': { 0.02: 2.24, 0.04: 2.26, 0.06: 2.27, 0.08: 2.79, 0.1: 2.81 },
+        'Standard envelope': { 0.21: 2.81, 0.46: 3.31 },
+        'Large envelope': { 0.96: 3.96 },
+        'Extra-large envelope': { 0.96: 4.31 },
+        'Small parcel': { 0.15: 4.31, 0.4: 4.71 }
+    },
+    'IT': {
+        'Light envelope': { 0.02: 2.64, 0.04: 2.65, 0.06: 2.67, 0.08: 2.79, 0.1: 2.81 },
+        'Standard envelope': { 0.21: 2.81, 0.46: 3.04 },
+        'Large envelope': { 0.96: 3.35 },
+        'Extra-large envelope': { 0.96: 3.59 },
+        'Small parcel': { 0.15: 3.59, 0.4: 3.91 }
+    },
+    'ES': {
+        'Light envelope': { 0.02: 2.15, 0.04: 2.21, 0.06: 2.23, 0.08: 2.55, 0.1: 2.59 },
+        'Standard envelope': { 0.21: 2.61, 0.46: 2.85 },
+        'Large envelope': { 0.96: 3.00 },
+        'Extra-large envelope': { 0.96: 3.23 },
+        'Small parcel': { 0.15: 3.23, 0.4: 3.46 }
+    },
+    'NL': {
+        'Light envelope': { 0.02: 1.89, 0.04: 1.93, 0.06: 1.94, 0.08: 2.01, 0.1: 2.04 },
+        'Standard envelope': { 0.21: 2.09, 0.46: 2.18 },
+        'Large envelope': { 0.96: 2.79 },
+        'Extra-large envelope': { 0.96: 3.12 },
+        'Small parcel': { 0.15: 3.13, 0.4: 3.17 }
+    },
+    'SE': {
+        'Light envelope': { 0.02: 28.23, 0.04: 28.40, 0.06: 28.42, 0.08: 29.72, 0.1: 29.88 },
+        'Standard envelope': { 0.21: 30.49, 0.46: 35.38 },
+        'Large envelope': { 0.96: 36.84 },
+        'Extra-large envelope': { 0.96: 39.80 },
+        'Small parcel': { 0.15: 41.23, 0.4: 43.31 }
+    },
+    'PL': {
+        'Light envelope': { 0.02: 1.58, 0.04: 1.59, 0.06: 1.60, 0.08: 1.62, 0.1: 1.63 },
+        'Standard envelope': { 0.21: 1.64, 0.46: 1.73 },
+        'Large envelope': { 0.96: 1.79 },
+        'Extra-large envelope': { 0.96: 1.81 },
+        'Small parcel': { 0.15: 1.81, 0.4: 1.86 }
+    },
+    'BE': {
+        'Light envelope': { 0.02: 1.69, 0.04: 1.72, 0.06: 1.73, 0.08: 1.77, 0.1: 1.81 },
+        'Standard envelope': { 0.21: 1.93, 0.46: 2.07 },
+        'Large envelope': { 0.96: 2.57 },
+        'Extra-large envelope': { 0.96: 2.85 },
+        'Small parcel': { 0.15: 2.64, 0.4: 2.96 }
+    }
+};
+
+// Low-Price FBA Size Tiers - Updated to align with new envelope size tiers
+const LOW_PRICE_FBA_SIZE_TIERS = {
+    SMALL_ENVELOPE: {
+        name: 'Light envelope',
+        maxDimensions: [33, 23, 2.5], // Updated dimensions for Low-Price FBA
+        weightBrackets: [0.02, 0.04, 0.06, 0.08, 0.1],
+        maxUnitWeight: 0.1,
+        maxDimensionalWeight: null
+    },
+    STANDARD_ENVELOPE: {
+        name: 'Standard envelope', 
+        maxDimensions: [33, 23, 2.5], // Updated dimensions for Low-Price FBA
+        weightBrackets: [0.21, 0.46],
+        maxUnitWeight: 0.46,
+        maxDimensionalWeight: null
+    },
+    LARGE_ENVELOPE: {
+        name: 'Large envelope',
+        maxDimensions: [33, 23, 4], // Updated dimensions for Low-Price FBA
+        weightBrackets: [0.96],
+        maxUnitWeight: 0.96,
+        maxDimensionalWeight: null
+    },
+    EXTRA_LARGE_ENVELOPE: {
+        name: 'Extra-large envelope',
+        maxDimensions: [33, 23, 6], // Updated dimensions for Low-Price FBA
+        weightBrackets: [0.96],
+        maxUnitWeight: 0.96,
+        maxDimensionalWeight: null
+    },
+    SMALL_PARCEL: {
+        name: 'Small parcel',
+        maxDimensions: [35, 25, 12],
+        weightBrackets: [0.15, 0.4], // Low-Price FBA only has 2 weight brackets for small parcel
+        maxUnitWeight: 0.4,
+        maxDimensionalWeight: 0.4
+    }
+    // Note: Low-Price FBA only covers envelope and small parcel categories
+};
+
 class FBACalculator {
     constructor() {
         this.initializeEventListeners();
@@ -292,6 +412,7 @@ class FBACalculator {
         const totalWeight = weightKg + (weightGrams / 1000); // Convert to kg
 
         const zone = formData.get('zone');
+        const productPrice = parseFloat(formData.get('productPrice')) || 0;
 
         // Calculate dimensional weight
         const { height, width, depth } = dimensions;
@@ -310,12 +431,21 @@ class FBACalculator {
             pricingWeight = Math.max(totalWeight, dimensionalWeight);
         }
         
+        // Check if product qualifies for Low-Price FBA
+        const qualifiesForLowPrice = this.checkLowPriceFBAEligibility(productPrice, zone);
+        
         // Find appropriate weight bracket within the tier using pricing weight
         const weightBracket = this.findWeightBracket(sizeTier, pricingWeight);
         const fee = this.calculateFee(sizeTier, pricingWeight, zone, weightBracket);
+        
+        // Calculate Low-Price FBA fee if eligible
+        let lowPriceFee = null;
+        if (qualifiesForLowPrice) {
+            lowPriceFee = this.calculateLowPriceFBAFee(sizeTier, pricingWeight, zone, weightBracket);
+        }
 
         // Display results
-        this.displayResults(dimensions, totalWeight, sizeTier, fee, dimensionalWeight, weightBracket);
+        this.displayResults(dimensions, totalWeight, sizeTier, fee, dimensionalWeight, weightBracket, productPrice, qualifiesForLowPrice, lowPriceFee, zone);
     }
 
     determineSizeTier(dimensions, unitWeight, dimensionalWeight = null) {
@@ -492,6 +622,88 @@ class FBACalculator {
         return sortedDims.every(dim => dim < 10);
     }
 
+    checkLowPriceFBAEligibility(productPrice, zone) {
+        if (!productPrice || productPrice <= 0) {
+            return false;
+        }
+        
+        const threshold = LOW_PRICE_FBA_THRESHOLDS[zone];
+        if (!threshold) {
+            return false;
+        }
+        
+        // Check if Belgium support is active (February 11, 2025)
+        if (zone === 'BE') {
+            const currentDate = new Date();
+            const belgiumLaunchDate = new Date('2025-02-11');
+            if (currentDate < belgiumLaunchDate) {
+                return false;
+            }
+        }
+        
+        return productPrice <= threshold;
+    }
+
+    calculateLowPriceFBAFee(sizeTier, weight, zone, weightBracket) {
+        const lowPriceData = LOW_PRICE_FBA_FEES[zone];
+        if (!lowPriceData || !lowPriceData[sizeTier.name]) {
+            return 'Low-Price FBA rates not available for this category';
+        }
+
+        const tierFees = lowPriceData[sizeTier.name];
+        
+        // Find the appropriate fee for the weight bracket
+        let baseFee = null;
+        const sortedWeightLimits = Object.keys(tierFees)
+            .map(w => parseFloat(w))
+            .sort((a, b) => a - b);
+        
+        for (const limit of sortedWeightLimits) {
+            if (weight <= limit) {
+                baseFee = tierFees[limit];
+                break;
+            }
+        }
+
+        // If weight exceeds all brackets, use the highest bracket
+        if (baseFee === null) {
+            const weights = Object.keys(tierFees)
+                .map(w => parseFloat(w))
+                .sort((a, b) => b - a);
+            if (weights.length > 0) {
+                baseFee = tierFees[weights[0]];
+            }
+        }
+
+        // Handle null fees (service not available)
+        if (baseFee === null) {
+            return 'Low-Price FBA service not available';
+        }
+
+        let totalFee = baseFee;
+
+        // Format with appropriate currency symbol
+        const currencySymbols = {
+            'UK': '£',
+            'DE': '€',
+            'FR': '€', 
+            'IT': '€',
+            'ES': '€',
+            'NL': '€',
+            'SE': ' SEK',
+            'PL': ' PLN',
+            'BE': '€'
+        };
+
+        const symbol = currencySymbols[zone] || '';
+        
+        if (zone === 'SE' || zone === 'PL') {
+            return `${totalFee.toFixed(2)}${symbol}`;
+        } else {
+            return `${symbol}${totalFee.toFixed(2)}`;
+        }
+    }
+
     calculateFee(sizeTier, weight, zone, weightBracket) {
         const zoneData = FBA_FEES[zone];
         if (!zoneData || !zoneData[sizeTier.name]) {
@@ -581,14 +793,15 @@ class FBACalculator {
 
 
 
-    displayResults(dimensions, unitWeight, sizeTier, fee, dimensionalWeight, weightBracket) {
+    displayResults(dimensions, unitWeight, sizeTier, fee, dimensionalWeight, weightBracket, productPrice = 0, qualifiesForLowPrice = false, lowPriceFee = null, zone = 'UK') {
         document.getElementById('sizeTier').textContent = sizeTier.name;
         document.getElementById('totalWeight').textContent = `Unit: ${unitWeight.toFixed(3)}kg | Dimensional: ${dimensionalWeight.toFixed(3)}kg`;
         document.getElementById('dimensions').textContent = `${dimensions.height} x ${dimensions.width} x ${dimensions.depth} cm`;
         document.getElementById('fbaFee').textContent = fee;
         
-        // Add weight bracket info if it doesn't exist (scoped to results section)
         const resultsSection = document.getElementById('results');
+        
+        // Add weight bracket info if it doesn't exist (scoped to results section)
         let weightBracketElement = resultsSection ? resultsSection.querySelector('#weightBracket') : null;
         if (!weightBracketElement && resultsSection) {
             const newResultItem = document.createElement('div');
@@ -605,6 +818,47 @@ class FBACalculator {
         
         if (weightBracketElement) {
             weightBracketElement.textContent = weightBracket.description;
+        }
+        
+        // Add Low-Price FBA info if it doesn't exist
+        let lowPriceElement = resultsSection ? resultsSection.querySelector('#lowPriceFBA') : null;
+        if (!lowPriceElement && resultsSection) {
+            const newResultItem = document.createElement('div');
+            newResultItem.className = 'result-item';
+            newResultItem.innerHTML = '<strong>Low-Price FBA:</strong> <span id="lowPriceFBA"></span>';
+            const lastResultItem = resultsSection.querySelector('.result-item:last-child');
+            if (lastResultItem) {
+                resultsSection.insertBefore(newResultItem, lastResultItem.nextSibling);
+            } else {
+                resultsSection.appendChild(newResultItem);
+            }
+            lowPriceElement = resultsSection.querySelector('#lowPriceFBA');
+        }
+        
+        if (lowPriceElement) {
+            if (productPrice > 0) {
+                const threshold = LOW_PRICE_FBA_THRESHOLDS[zone] || LOW_PRICE_FBA_THRESHOLDS['UK'];
+                const currencySymbols = {
+                    'UK': '£', 'DE': '€', 'FR': '€', 'IT': '€', 'ES': '€', 'NL': '€', 'SE': ' SEK', 'PL': ' PLN', 'BE': '€'
+                };
+                const symbol = currencySymbols[zone] || '£';
+                const thresholdDisplay = zone === 'SE' || zone === 'PL' ? `${threshold}${symbol}` : `${symbol}${threshold}`;
+                
+                if (qualifiesForLowPrice) {
+                    const regularFeeNum = typeof fee === 'string' ? parseFloat(fee.replace(/[^\d.]/g, '')) : fee;
+                    const lowPriceFeeNum = typeof lowPriceFee === 'string' ? parseFloat(lowPriceFee.replace(/[^\d.]/g, '')) : lowPriceFee;
+                    const savings = regularFeeNum && lowPriceFeeNum ? (regularFeeNum - lowPriceFeeNum).toFixed(2) : null;
+                    
+                    lowPriceElement.innerHTML = `✅ <strong>Eligible</strong> (${zone === 'SE' || zone === 'PL' ? `${productPrice}${symbol}` : `${symbol}${productPrice}`} ≤ ${thresholdDisplay})<br><strong>Low-Price Fee:</strong> ${lowPriceFee || 'Calculating...'}${savings ? `<br><strong>Savings:</strong> ${zone === 'SE' || zone === 'PL' ? `${savings}${symbol}` : `${symbol}${savings}`}` : ''}`;
+                    lowPriceElement.style.color = '#28a745';
+                } else {
+                    lowPriceElement.innerHTML = `❌ <strong>Not eligible</strong><br>Price ${zone === 'SE' || zone === 'PL' ? `${productPrice}${symbol}` : `${symbol}${productPrice}`} > threshold ${thresholdDisplay}`;
+                    lowPriceElement.style.color = '#dc3545';
+                }
+            } else {
+                lowPriceElement.textContent = 'Enter product price to check Low-Price FBA eligibility';
+                lowPriceElement.style.color = '#6c757d';
+            }
         }
         
         document.getElementById('results').style.display = 'block';

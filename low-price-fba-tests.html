@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Low-Price FBA Critical Tests</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .test-case { margin: 10px 0; padding: 10px; background: #f9f9f9; border-radius: 3px; }
+        .pass { background-color: #d4edda; border-left: 4px solid #28a745; }
+        .fail { background-color: #f8d7da; border-left: 4px solid #dc3545; }
+        .test-results { margin-top: 10px; font-family: monospace; white-space: pre-wrap; }
+        button { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .summary { font-size: 18px; font-weight: bold; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Low-Price FBA Critical Tests</h1>
+    <p>Testing all Low-Price FBA functionality including price thresholds, fee calculations, and edge cases.</p>
+    
+    <div class="test-section">
+        <h2>Test Controls</h2>
+        <button onclick="runAllTests()">🚀 Run All Critical Tests</button>
+        <button onclick="runPriceThresholdTests()">💰 Price Threshold Tests</button>
+        <button onclick="runFeeCalculationTests()">📊 Fee Calculation Tests</button>
+        <button onclick="runEdgeCaseTests()">⚠️ Edge Case Tests</button>
+        <button onclick="clearResults()">🗑️ Clear Results</button>
+    </div>
+
+    <div id="testResults" class="test-results"></div>
+    <div id="summary" class="summary"></div>
+
+    <script src="fba-calculator.js"></script>
+    <script>
+        let calculator;
+        let totalTests = 0;
+        let passedTests = 0;
+        let failedTests = 0;
+
+        // Initialize calculator
+        document.addEventListener('DOMContentLoaded', () => {
+            calculator = new FBACalculator();
+            console.log('Calculator initialized for testing');
+        });
+
+        function clearResults() {
+            document.getElementById('testResults').innerHTML = '';
+            document.getElementById('summary').innerHTML = '';
+            totalTests = 0;
+            passedTests = 0;
+            failedTests = 0;
+        }
+
+        function logResult(testName, passed, expected, actual, details = '') {
+            totalTests++;
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-case ${passed ? 'pass' : 'fail'}`;
+            
+            if (passed) {
+                passedTests++;
+                resultDiv.innerHTML = `
+                    <strong>✅ PASS: ${testName}</strong><br>
+                    Expected: ${expected}<br>
+                    Got: ${actual}
+                    ${details ? `<br>Details: ${details}` : ''}
+                `;
+            } else {
+                failedTests++;
+                resultDiv.innerHTML = `
+                    <strong>❌ FAIL: ${testName}</strong><br>
+                    Expected: ${expected}<br>
+                    Got: ${actual}
+                    ${details ? `<br>Details: ${details}` : ''}
+                `;
+            }
+            
+            document.getElementById('testResults').appendChild(resultDiv);
+        }
+
+        function updateSummary() {
+            const summaryDiv = document.getElementById('summary');
+            const percentage = totalTests > 0 ? ((passedTests / totalTests) * 100).toFixed(1) : 0;
+            summaryDiv.innerHTML = `
+                📊 Test Summary: ${passedTests}/${totalTests} passed (${percentage}%)
+                ${failedTests > 0 ? `⚠️ ${failedTests} tests failed` : '🎉 All tests passed!'}
+            `;
+            summaryDiv.className = failedTests > 0 ? 'summary fail' : 'summary pass';
+        }
+
+        function runPriceThresholdTests() {
+            console.log('Running price threshold tests...');
+            
+            const thresholdTests = [
+                // UK Tests
+                { zone: 'UK', price: 10.00, expected: true, name: 'UK exactly at threshold (£10)' },
+                { zone: 'UK', price: 9.99, expected: true, name: 'UK below threshold (£9.99)' },
+                { zone: 'UK', price: 10.01, expected: false, name: 'UK above threshold (£10.01)' },
+                
+                // Germany Tests
+                { zone: 'DE', price: 11.00, expected: true, name: 'DE exactly at threshold (€11)' },
+                { zone: 'DE', price: 10.50, expected: true, name: 'DE below threshold (€10.50)' },
+                { zone: 'DE', price: 11.50, expected: false, name: 'DE above threshold (€11.50)' },
+                
+                // France Tests
+                { zone: 'FR', price: 12.00, expected: true, name: 'FR exactly at threshold (€12)' },
+                { zone: 'FR', price: 11.99, expected: true, name: 'FR below threshold (€11.99)' },
+                { zone: 'FR', price: 12.01, expected: false, name: 'FR above threshold (€12.01)' },
+                
+                // Sweden Tests
+                { zone: 'SE', price: 140.00, expected: true, name: 'SE exactly at threshold (140 SEK)' },
+                { zone: 'SE', price: 139.50, expected: true, name: 'SE below threshold (139.50 SEK)' },
+                { zone: 'SE', price: 140.50, expected: false, name: 'SE above threshold (140.50 SEK)' },
+                
+                // Poland Tests
+                { zone: 'PL', price: 55.00, expected: true, name: 'PL exactly at threshold (55 PLN)' },
+                { zone: 'PL', price: 54.99, expected: true, name: 'PL below threshold (54.99 PLN)' },
+                { zone: 'PL', price: 55.01, expected: false, name: 'PL above threshold (55.01 PLN)' },
+                
+                // Belgium Tests (should fail before Feb 11, 2025)
+                { zone: 'BE', price: 12.00, expected: false, name: 'BE before launch date (should fail)' },
+                
+                // Edge Cases
+                { zone: 'UK', price: 0, expected: false, name: 'Zero price should not qualify' },
+                { zone: 'UK', price: -5, expected: false, name: 'Negative price should not qualify' },
+                { zone: 'INVALID', price: 5, expected: false, name: 'Invalid zone should not qualify' }
+            ];
+
+            thresholdTests.forEach(test => {
+                const result = calculator.checkLowPriceFBAEligibility(test.price, test.zone);
+                const passed = result === test.expected;
+                logResult(test.name, passed, test.expected, result, 
+                    `Price: ${test.price}, Zone: ${test.zone}`);
+            });
+        }
+
+        function runFeeCalculationTests() {
+            console.log('Running fee calculation tests...');
+            
+            const feeTests = [
+                // UK Light Envelope Tests
+                {
+                    name: 'UK Light Envelope 20g',
+                    dimensions: { height: 15, width: 10, depth: 1 },
+                    weight: 0.02,
+                    zone: 'UK',
+                    expectedRegular: '£1.83',
+                    expectedLowPrice: '£1.46',
+                    productPrice: 8.00
+                },
+                {
+                    name: 'UK Light Envelope 100g',
+                    dimensions: { height: 15, width: 10, depth: 1 },
+                    weight: 0.1,
+                    zone: 'UK',
+                    expectedRegular: '£2.08',
+                    expectedLowPrice: '£1.70',
+                    productPrice: 9.00
+                },
+                
+                // DE Standard Envelope Tests
+                {
+                    name: 'DE Standard Envelope 210g',
+                    dimensions: { height: 30, width: 20, depth: 2 },
+                    weight: 0.21,
+                    zone: 'DE',
+                    expectedRegular: '€2.31',
+                    expectedLowPrice: '€2.12',
+                    productPrice: 10.00
+                },
+                
+                // FR Large Envelope Tests
+                {
+                    name: 'FR Large Envelope 960g',
+                    dimensions: { height: 30, width: 20, depth: 3.5 },
+                    weight: 0.96,
+                    zone: 'FR',
+                    expectedRegular: '€3.04',
+                    expectedLowPrice: '€3.96',
+                    productPrice: 11.00
+                },
+                
+                // SE Small Parcel Tests
+                {
+                    name: 'SE Small Parcel 150g',
+                    dimensions: { height: 25, width: 15, depth: 8 },
+                    weight: 0.15,
+                    zone: 'SE',
+                    expectedRegular: '47.65 SEK',
+                    expectedLowPrice: '41.23 SEK',
+                    productPrice: 120.00
+                },
+                
+                // PL Tests
+                {
+                    name: 'PL Light Envelope 40g',
+                    dimensions: { height: 15, width: 10, depth: 1 },
+                    weight: 0.04,
+                    zone: 'PL',
+                    expectedRegular: '2.91 PLN',
+                    expectedLowPrice: '1.59 PLN',
+                    productPrice: 50.00
+                }
+            ];
+
+            feeTests.forEach(test => {
+                try {
+                    // Calculate regular FBA fee
+                    const sortedDims = [test.dimensions.height, test.dimensions.width, test.dimensions.depth].sort((a, b) => b - a);
+                    const dimensionalWeight = calculator.calculateDimensionalWeight(sortedDims[0], sortedDims[1], sortedDims[2]);
+                    const sizeTier = calculator.determineSizeTier(test.dimensions, test.weight, dimensionalWeight);
+                    const pricingWeight = Math.max(test.weight, dimensionalWeight);
+                    const weightBracket = calculator.findWeightBracket(sizeTier, pricingWeight);
+                    
+                    // Regular fee
+                    const regularFee = calculator.calculateFee(sizeTier, pricingWeight, test.zone, weightBracket);
+                    const regularPassed = regularFee === test.expectedRegular;
+                    logResult(`${test.name} - Regular FBA Fee`, regularPassed, test.expectedRegular, regularFee);
+                    
+                    // Low-Price FBA eligibility and fee
+                    const qualifies = calculator.checkLowPriceFBAEligibility(test.productPrice, test.zone);
+                    if (qualifies) {
+                        const lowPriceFee = calculator.calculateLowPriceFBAFee(sizeTier, pricingWeight, test.zone, weightBracket);
+                        const lowPricePassed = lowPriceFee === test.expectedLowPrice;
+                        logResult(`${test.name} - Low-Price FBA Fee`, lowPricePassed, test.expectedLowPrice, lowPriceFee);
+                        
+                        // Savings calculation
+                        const regularNum = parseFloat(regularFee.replace(/[^\d.]/g, ''));
+                        const lowPriceNum = parseFloat(lowPriceFee.replace(/[^\d.]/g, ''));
+                        const savings = regularNum - lowPriceNum;
+                        const savingsPositive = savings > 0;
+                        logResult(`${test.name} - Savings Check`, savingsPositive, 'Positive savings', `${savings.toFixed(2)} savings`);
+                    } else {
+                        logResult(`${test.name} - Low-Price Eligibility`, false, 'Should qualify', 'Not eligible');
+                    }
+                    
+                } catch (error) {
+                    logResult(`${test.name} - Error`, false, 'No error', `Error: ${error.message}`);
+                }
+            });
+        }
+
+        function runEdgeCaseTests() {
+            console.log('Running edge case tests...');
+            
+            // Test Belgium date restriction
+            const belgiumTest = calculator.checkLowPriceFBAEligibility(10.00, 'BE');
+            const currentDate = new Date();
+            const belgiumLaunchDate = new Date('2025-02-11');
+            const expectedBelgium = currentDate >= belgiumLaunchDate;
+            logResult('Belgium Launch Date Check', belgiumTest === expectedBelgium, 
+                expectedBelgium ? 'Available' : 'Not available yet', 
+                belgiumTest ? 'Available' : 'Not available yet',
+                `Current date: ${currentDate.toDateString()}, Launch: ${belgiumLaunchDate.toDateString()}`);
+            
+            // Test size tier boundaries for Low-Price FBA
+            const sizeTierTests = [
+                {
+                    name: 'Product too large for Low-Price FBA',
+                    dimensions: { height: 50, width: 40, depth: 30 }, // Standard parcel size
+                    weight: 2.0,
+                    zone: 'UK',
+                    productPrice: 8.00,
+                    shouldHaveLowPrice: false
+                },
+                {
+                    name: 'Product within Low-Price FBA size limits',
+                    dimensions: { height: 30, width: 20, depth: 2 }, // Standard envelope
+                    weight: 0.3,
+                    zone: 'UK',
+                    productPrice: 8.00,
+                    shouldHaveLowPrice: true
+                }
+            ];
+
+            sizeTierTests.forEach(test => {
+                try {
+                    const sortedDims = [test.dimensions.height, test.dimensions.width, test.dimensions.depth].sort((a, b) => b - a);
+                    const dimensionalWeight = calculator.calculateDimensionalWeight(sortedDims[0], sortedDims[1], sortedDims[2]);
+                    const sizeTier = calculator.determineSizeTier(test.dimensions, test.weight, dimensionalWeight);
+                    const pricingWeight = Math.max(test.weight, dimensionalWeight);
+                    const weightBracket = calculator.findWeightBracket(sizeTier, pricingWeight);
+                    
+                    const qualifies = calculator.checkLowPriceFBAEligibility(test.productPrice, test.zone);
+                    if (qualifies) {
+                        const lowPriceFee = calculator.calculateLowPriceFBAFee(sizeTier, pricingWeight, test.zone, weightBracket);
+                        const hasLowPriceRate = !lowPriceFee.includes('not available');
+                        logResult(test.name, hasLowPriceRate === test.shouldHaveLowPrice, 
+                            test.shouldHaveLowPrice ? 'Should have Low-Price rate' : 'Should not have Low-Price rate',
+                            hasLowPriceRate ? 'Has Low-Price rate' : 'No Low-Price rate',
+                            `Size tier: ${sizeTier.name}, Fee result: ${lowPriceFee}`);
+                    }
+                } catch (error) {
+                    logResult(`${test.name} - Error`, false, 'No error', `Error: ${error.message}`);
+                }
+            });
+            
+            // Test currency formatting
+            const currencyTests = [
+                { zone: 'UK', expectedSymbol: '£', position: 'prefix' },
+                { zone: 'DE', expectedSymbol: '€', position: 'prefix' },
+                { zone: 'SE', expectedSymbol: 'SEK', position: 'suffix' },
+                { zone: 'PL', expectedSymbol: 'PLN', position: 'suffix' }
+            ];
+
+            currencyTests.forEach(test => {
+                try {
+                    const testDimensions = { height: 15, width: 10, depth: 1 };
+                    const testWeight = 0.02;
+                    const sortedDims = [testDimensions.height, testDimensions.width, testDimensions.depth].sort((a, b) => b - a);
+                    const dimensionalWeight = calculator.calculateDimensionalWeight(sortedDims[0], sortedDims[1], sortedDims[2]);
+                    const sizeTier = calculator.determineSizeTier(testDimensions, testWeight, dimensionalWeight);
+                    const pricingWeight = Math.max(testWeight, dimensionalWeight);
+                    const weightBracket = calculator.findWeightBracket(sizeTier, pricingWeight);
+                    
+                    const lowPriceFee = calculator.calculateLowPriceFBAFee(sizeTier, pricingWeight, test.zone, weightBracket);
+                    
+                    let correctFormat = false;
+                    if (test.position === 'prefix') {
+                        correctFormat = lowPriceFee.startsWith(test.expectedSymbol);
+                    } else {
+                        correctFormat = lowPriceFee.endsWith(test.expectedSymbol);
+                    }
+                    
+                    logResult(`${test.zone} Currency Format`, correctFormat, 
+                        `${test.expectedSymbol} as ${test.position}`, 
+                        lowPriceFee,
+                        `Expected ${test.expectedSymbol} ${test.position}`);
+                } catch (error) {
+                    logResult(`${test.zone} Currency Format - Error`, false, 'No error', `Error: ${error.message}`);
+                }
+            });
+        }
+
+        function runAllTests() {
+            clearResults();
+            console.log('🚀 Running all critical tests...');
+            
+            runPriceThresholdTests();
+            runFeeCalculationTests();
+            runEdgeCaseTests();
+            
+            updateSummary();
+            
+            console.log(`Tests completed: ${passedTests}/${totalTests} passed`);
+        }
+    </script>
+</body>
+</html>
